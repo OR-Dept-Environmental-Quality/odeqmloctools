@@ -12,7 +12,7 @@ get_huc12name(x, y)
 \item{y}{The latitude in decimal degrees.}
 }
 \value{
-The HUC8 name
+The HUC12 name
 }
 \description{
 The function will query Oregon DEQ's WBD feature service to determine

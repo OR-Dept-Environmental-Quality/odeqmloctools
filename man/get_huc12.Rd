@@ -12,7 +12,7 @@ get_huc12(x, y)
 \item{y}{The latitude in decimal degrees.}
 }
 \value{
-sf object or data frame columns for HUC12 and HUC12_Name
+data frame columns for HUC12 and HUC12_Name
 }
 \description{
 The function will query Oregon DEQ's WBD feature service to determine the HUC12 subwatershed code and name. The x and y coordinates (longitude and latitude) are

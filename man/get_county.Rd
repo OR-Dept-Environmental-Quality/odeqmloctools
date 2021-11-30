@@ -12,7 +12,7 @@ get_county(x, y)
 \item{y}{The latitude in decimal degrees.}
 }
 \value{
-sf object or string of county basename
+string of county basename
 }
 \description{
 The function will query the Untied States Census Bureau states and county
