@@ -32,24 +32,41 @@ get_llidrm <- function(llid, x, y, max_length=82, return_sf=FALSE){
   to_crs <- 2994
 
   # get the site, make sf object, NAD 83 EPSG:4269
-  site <- sf::st_as_sf(data.frame(Longitude=x, Latitude=y), coords = c("Longitude", "Latitude"), crs = 4269) %>%
-    sf::st_transform(crs=to_crs)
+  site <- sf::st_as_sf(data.frame(Longitude = x, Latitude = y), coords = c("Longitude", "Latitude"), crs = 4269) %>%
+    sf::st_transform(crs = to_crs)
 
-  pathLLID <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0/query?where="
+  query_url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0/query?where="
 
   # get the LLID reach
-  request_LLID <- httr::GET(url = paste0(pathLLID, "LLID='",llid,"'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON"))
-  response_LLID <- httr::content(request_LLID, as = "text", encoding = "UTF-8")
+  request <- httr::GET(url = paste0(query_url, "LLID='",llid,"'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON"))
 
-  reach_df<- geojsonsf::geojson_sf(response_LLID) %>%
+  response <- httr::content(request, as = "text", encoding = "UTF-8")
+
+  reach_df <- geojsonsf::geojson_sf(response) %>%
     sf::st_drop_geometry()
 
+  if (httr::http_error(request) | NROW(reach_df) == 0) {
+    warning("Error, NA returned")
+
+    if (return_sf) {
+      return(dplyr::mutate(site,
+                           NAME = NA_character_,
+                           RM_Total = NA_real_,
+                           LLID = NA_character_,
+                           River_Mile = NA_real_) %>%
+               dplyr::select(NAME, RM_Total, LLID, River_Mile, geometry) %>%
+               sf::st_transform(crs = 4326))
+    } else {
+      return(NA_real_)
+    }
+  }
+
   # get measure value at top and bottom
-  reach_points0 <- geojsonsf::geojson_sf(response_LLID) %>%
-    sf::st_cast(to="POINT") %>%
-    dplyr::mutate(river_feet=units::set_units(unlist(lapply(geometry, FUN=function(x) {x[4]}), recursive = TRUE), ft)) %>%
+  reach_points0 <- geojsonsf::geojson_sf(response) %>%
+    sf::st_cast(to = "POINT") %>%
+    dplyr::mutate(river_feet = units::set_units(unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE), ft)) %>%
     dplyr::arrange(river_feet) %>%
-    sf::st_transform(crs=to_crs) %>%
+    sf::st_transform(crs = to_crs) %>%
     sf::st_zm()
 
   # Snap distance in feet because of crs
@@ -57,7 +74,7 @@ get_llidrm <- function(llid, x, y, max_length=82, return_sf=FALSE){
 
   # Get the the four closest vertices by snap distance
   reach_points0 <- reach_points0 %>%
-    dplyr::slice_min(Snap_Distance, n=4) %>%
+    dplyr::slice_min(Snap_Distance, n = 4) %>%
     dplyr::arrange(river_feet)
 
   # Get minimum river feet
@@ -68,13 +85,13 @@ get_llidrm <- function(llid, x, y, max_length=82, return_sf=FALSE){
     dplyr::select(LLID) %>%
     dplyr::group_by(LLID) %>%
     summarise(do_union = FALSE) %>%
-    sf::st_cast(to="LINESTRING") %>%
-    odeqcdr::split_lines(max_length = max_length, id ="LLID")
+    sf::st_cast(to = "LINESTRING") %>%
+    odeqcdr::split_lines(max_length = max_length, id = "LLID")
 
   reach1$length_seg <- units::set_units(sf::st_length(reach1), mi)
 
-  reach_points <- sf::st_cast(reach1, to="POINT")
-  reach_points$row=as.numeric(row.names(reach_points))
+  reach_points <- sf::st_cast(reach1, to = "POINT")
+  reach_points$row = as.numeric(row.names(reach_points))
 
   # Get only the first point on each linestring segment, and the last point (most upstream). Use the row number to filter.
   reach_points <- dplyr::filter(reach_points, row %in% c(1:nrow(reach_points),  max(reach_points$row)))
@@ -85,21 +102,21 @@ get_llidrm <- function(llid, x, y, max_length=82, return_sf=FALSE){
   # Snap distance in feet because of crs
   reach_points$Snap_Distance <- sf::st_distance(reach_points, site, by_element = TRUE)
 
-  if(units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
+  if (units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
     warning("Snap distance is > 400 meters. Is the x and y near the target llid?")
 
   # filter to the closest point and clean up
   rm_snap <- reach_points %>%
-    dplyr::mutate(River_Mile=round(cumsum(length_seg),2)) %>%
-    dplyr::filter(Snap_Distance==min(Snap_Distance)) %>%
+    dplyr::mutate(River_Mile = round(cumsum(length_seg),2)) %>%
+    dplyr::filter(Snap_Distance == min(Snap_Distance)) %>%
     dplyr::left_join(reach_df) %>%
-    sf::st_transform(crs=4326) %>% # for leaflet
+    sf::st_transform(crs = 4326) %>% # for leaflet
     #dplyr::mutate(Latitude=unlist(lapply(geometry, FUN=function(x) {x[2]}), recursive = TRUE),
     #              Longitude=unlist(lapply(geometry, FUN=function(x) {x[1]}), recursive = TRUE)) %>%
     sf::st_zm() %>%
     dplyr::select(NAME, RM_Total, LLID, River_Mile)
 
-  if(return_sf) {
+  if (return_sf) {
     return(rm_snap)
   } else {
     return(as.numeric(rm_snap$River_Mile))
