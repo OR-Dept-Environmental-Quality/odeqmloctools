@@ -8,10 +8,12 @@
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @export
 #' @return state code
-get_state <- function(x, y){
-  vals <- purrr::map2_chr(.x = x, .y = y, .f = get_state_)
+get_state <- function(x, y, crs){
+  vals <- purrr::pmap(list(x, y, crs), .f = get_state_)
   return(vals)
   }
 
@@ -20,9 +22,11 @@ get_state <- function(x, y){
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @noRd
 #' @return state code
-get_state_ <- function(x, y){
+get_state_ <- function(x, y, crs){
 
   # Test data
   # y=42.09361

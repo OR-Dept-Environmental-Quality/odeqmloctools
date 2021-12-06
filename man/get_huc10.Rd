@@ -4,12 +4,15 @@
 \alias{get_huc10}
 \title{Get HUC10 info}
 \usage{
-get_huc10(x, y)
+get_huc10(x, y, crs)
 }
 \arguments{
 \item{x}{The longitude in decimal degrees.}
 
 \item{y}{The latitude in decimal degrees.}
+
+\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value. Accepts a vector.}
 }
 \value{
 sf object or data frame columns for HUC10 and HUC10_Name

@@ -4,12 +4,15 @@
 \alias{get_county}
 \title{Get county}
 \usage{
-get_county(x, y)
+get_county(x, y, crs)
 }
 \arguments{
 \item{x}{The longitude in decimal degrees.}
 
 \item{y}{The latitude in decimal degrees.}
+
+\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value. Accepts a vector.}
 }
 \value{
 string of county basename

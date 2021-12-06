@@ -4,12 +4,15 @@
 \alias{get_huc10name}
 \title{Get HUC10 name}
 \usage{
-get_huc10name(x, y)
+get_huc10name(x, y, crs)
 }
 \arguments{
 \item{x}{The longitude in decimal degrees.}
 
 \item{y}{The latitude in decimal degrees.}
+
+\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value. Accepts a vector.}
 }
 \value{
 The HUC8 name

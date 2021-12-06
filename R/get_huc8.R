@@ -8,11 +8,13 @@
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @seealso [get_huc8code()] and [get_huc8name()]
 #' @export
 #' @return data frame columns for HUC8 and HUC8_Name
-get_huc8 <- function(x, y){
-  df <- purrr::map2_dfr(.x = x, .y = y, .f = get_huc8_)
+get_huc8 <- function(x, y, crs){
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_huc8_)
   return(df)
 
 }
@@ -25,11 +27,13 @@ get_huc8 <- function(x, y){
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @seealso [get_huc8()], [get_huc8name()]
 #' @export
 #' @return The HUC8 code as character format
-get_huc8code <- function(x, y) {
-  df <- purrr::map2_dfr(.x = x, .y = y, .f = get_huc8_)
+get_huc8code <- function(x, y, crs) {
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_huc8_)
   return(df$HUC8)
 }
 
@@ -42,11 +46,13 @@ get_huc8code <- function(x, y) {
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @seealso [get_huc8()], [get_huc8code()]
 #' @export
 #' @return The HUC8 name
-get_huc8name <- function(x, y) {
-  df <- purrr::map2_dfr(.x = x, .y = y, .f = get_huc8_)
+get_huc8name <- function(x, y, crs) {
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_huc8_)
   return(df$HUC8_Name)
 }
 
@@ -55,9 +61,11 @@ get_huc8name <- function(x, y) {
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value. Accepts a vector.
 #' @noRd
 #' @return data frame columns for HUC8 and HUC8_Name
-get_huc8_ <- function(x, y){
+get_huc8_ <- function(x, y, crs){
 
   # Test data
   # y=42.09361
@@ -78,7 +86,7 @@ get_huc8_ <- function(x, y){
   query_url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1/query?"
 
   request <- httr::GET(url = URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
-                                              "&inSR=4269&outFields=*&returnGeometry=false",
+                                              "&inSR=",crs,"&outFields=*&returnGeometry=false",
                                               "&returnIdsOnly=false&f=GeoJSON"), reserved = FALSE))
 
   response <- httr::content(request, as = "text", encoding = "UTF-8")
@@ -92,8 +100,6 @@ get_huc8_ <- function(x, y){
   }
 
   df <- dplyr::select(df, HUC8, HUC8_Name = Name)
-
-  df <- sf::st_drop_geometry(df)
 
   return(df)
 

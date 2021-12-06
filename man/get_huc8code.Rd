@@ -4,12 +4,15 @@
 \alias{get_huc8code}
 \title{Get HUC8 code}
 \usage{
-get_huc8code(x, y)
+get_huc8code(x, y, crs)
 }
 \arguments{
 \item{x}{The longitude in decimal degrees.}
 
 \item{y}{The latitude in decimal degrees.}
+
+\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value. Accepts a vector.}
 }
 \value{
 The HUC8 code as character format
