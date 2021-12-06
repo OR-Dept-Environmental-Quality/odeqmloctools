@@ -33,7 +33,7 @@ to NHDH_OR_931v220, which is the current version used for DEQ business data.
 }
 }
 \examples{
-anomaly_stats <- odeqcdr::ornhd
+nhd <- odeqmloctools::ornhd
 
 }
 \keyword{datasets}

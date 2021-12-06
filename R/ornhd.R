@@ -24,7 +24,7 @@
 #' @usage data(ornhd)
 #' @keywords datasets
 #' @examples
-#' anomaly_stats <- odeqcdr::ornhd
+#' nhd <- odeqmloctools::ornhd
 #'
 
 "ornhd"
