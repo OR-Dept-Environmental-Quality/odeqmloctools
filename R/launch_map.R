@@ -1,21 +1,29 @@
 #' Launch a web map in a browser to review and edit monitoring location information
 #'
-#' @param mloc Data frame of the monitoring location data generated using [odeqcdr::contin_import()].
+#' @param mloc Data frame of the monitoring location information.
+#'    Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name', 'Latitude', and 'Longitude'.
+#'    Other columns are optional but will be added if not present and the values set to NA.
+#'    The full set of mloc column names can be generated using [odeqcdr::cols_mloc] or
+#'    as a data frame using [df_mloc].
 #' @param px_ht Height of the map in pixels. Default is 470 which fits on most standard laptop screens. The minimum height is 300 pixels.
 #' @export
 #' @return Launches a leaflet map within a Shiny app. Returns mloc data frame with any saved changes on app close.
 
 launch_map <- function(mloc, px_ht=470){
 
-  if(!is.numeric(px_ht)) {stop("px_ht is not a numeric value.")}
+  if (!is.numeric(px_ht)) {stop("px_ht is not a numeric value.")}
 
-  if((px_ht < 300 )) {stop("px_ht must be greater than 300.")}
+  if ((px_ht < 300 )) {stop("px_ht must be greater than 300.")}
 
   px_ht <- paste0(px_ht,"px")
 
+  missing_cols <- df_mloc()[,!make.names(odeqcdr::cols_mloc()) %in% names(df.mloc2)]
+
+  mloc <- cbind(mloc, missing_cols)
+
   df.mloc <-  mloc %>%
-    dplyr::mutate(choices=paste(Monitoring.Location.ID, Monitoring.Location.Name, sep = " - "),
-                  row=dplyr::row_number())
+    dplyr::mutate(choices = paste(Monitoring.Location.ID, Monitoring.Location.Name, sep = " - "),
+                  row = dplyr::row_number())
 
   app <- shiny::shinyApp(
 
@@ -72,7 +80,7 @@ launch_map <- function(mloc, px_ht=470){
       # Retrieve cr$df from currently selected station
       df_reactive <- shiny::reactive({
         df.selectStation <- cr$df %>%
-          dplyr::filter(choices==input$selectStation)
+          dplyr::filter(choices == input$selectStation)
       })
 
       # Render the map
@@ -212,19 +220,8 @@ launch_map <- function(mloc, px_ht=470){
                                                      "<b>Monitoring.Location.Name:</b> ", Monitoring.Location.Name, "<br>",
                                                      "<b>Monitoring.Location.Type:</b> ", Monitoring.Location.Type, "<br>",
                                                      "<b>Latitude:</b> ", Latitude, "<br>",
-                                                     "<b>Longitude:</b> ", Longitude, "<br>",
-                                                     "<b>Horizontal.Datum:</b> ", Horizontal.Datum, "<br>",
-                                                     "<b>Coordinate.Collection.Method:</b> ", Coordinate.Collection.Method, "<br>",
-                                                     "<b>Source.Map.Scale:</b> ", Source.Map.Scale, "<br>",
-                                                     "<b>Monitoring.Location.Description:</b> ", Monitoring.Location.Description, "<br>",
-                                                     "<b>Tribal.Land:</b> ", Tribal.Land, "<br>",
-                                                     "<b>Tribal.Land.Name:</b> ", Tribal.Land.Name, "<br>",
                                                      "<b>Alternate.ID.1:</b> ", Alternate.ID.1, "<br>",
                                                      "<b>Alternate.Context.1:</b> ", Alternate.Context.1, "<br>",
-                                                     "<b>Alternate.ID.2:</b> ", Alternate.ID.2, "<br>",
-                                                     "<b>Alternate.Context.2:</b> ", Alternate.Context.2, "<br>",
-                                                     "<b>Alternate.ID.3:</b> ", Alternate.ID.3, "<br>",
-                                                     "<b>Alternate.Context.3:</b> ", Alternate.Context.3, "<br>",
                                                      "<b>Reachcode:</b> ", Reachcode, "<br>",
                                                      "<b>Measure:</b> ", Measure, "<br>",
                                                      "<b>LLID:</b> ", LLID, "<br>",
@@ -296,21 +293,22 @@ launch_map <- function(mloc, px_ht=470){
           cr$Alternate.Context.1 <- click$properties$OrgID
 
           output$AWQMSprintout <- shiny::renderPrint({
-            df <- data.frame(Alternate.ID.1=click$properties$MLocID,
-                             Alternate.Context.1=click$properties$OrgID)
+            df <- data.frame(Alternate.ID.1 = click$properties$MLocID,
+                             Alternate.Context.1 = click$properties$OrgID)
             df
           })
         }
 
-        if(click$id=="NHD") {
+        if (click$id == "NHD") {
 
           tryCatch(
 
             expr = {
 
-              NHDpoint <-odeqcdr::get_measure(pid=click$properties$Permanent_Identifier,
-                                              x=click$lng, y=click$lat,
-                                              return_sf=TRUE)
+              NHDpoint <- get_measure(pid = click$properties$Permanent_Identifier,
+                                      x = click$lng, y = click$lat,
+                                      crs = 4326,
+                                      return_sf = TRUE)
 
               cr$Permanent.Identifier <- click$properties$Permanent_Identifier
               cr$Reachcode <- click$properties$ReachCode
@@ -356,11 +354,11 @@ launch_map <- function(mloc, px_ht=470){
             expr = {
 
               # LLID
-              rm_point <-odeqcdr::get_llidrm(llid=click$properties$LLID,
-                                             x=click$lng,
-                                             y=click$lat,
-                                             max_length = 82,
-                                             return_sf=TRUE)
+              rm_point <-get_llidrm(llid=click$properties$LLID,
+                                    x=click$lng,
+                                    y=click$lat,
+                                    max_length = 82,
+                                    return_sf=TRUE)
 
               cr$LLID <- click$properties$LLID
               cr$River.Mile <- as.numeric(rm_point$River_Mile)
