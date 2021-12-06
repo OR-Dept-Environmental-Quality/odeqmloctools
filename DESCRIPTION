@@ -14,4 +14,15 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
 Imports: 
-    magrittr
+    dplyr (>= 1.0.0),
+    geojsonsf (>= 2.0.0),
+    httr (>= 1.4.0),
+    leafem (>= 0.1.1),
+    leaflet (>= 2.0.0),
+    leaflet.esri (>= 1.0.0),
+    lubridate (>= 1.7.0),
+    magrittr,
+    purrr (>= 0.3.4),
+    sf (>= 0.9-6),
+    shiny (>= 1.5.0),
+    tidyr (>= 1.0.0)
