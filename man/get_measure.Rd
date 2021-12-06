@@ -2,32 +2,38 @@
 % Please edit documentation in R/get_measure.R
 \name{get_measure}
 \alias{get_measure}
-\title{Get measure value along Oregon DEQ's NHDH_OR_931v220.}
+\title{Get measure value along Oregon NHDH_OR_931v220.}
 \usage{
-get_measure(pid, x, y, max_length = 25, return_sf = FALSE)
+get_measure(pid, x, y, crs, return_sf = FALSE)
 }
 \arguments{
-\item{pid}{The NHD Permanent_Identifier value as a string.}
+\item{pid}{The NHD Permanent_Identifier value as a string. Required.}
 
-\item{x}{The longitude in decimal degrees.}
+\item{x}{The longitude in decimal degrees. Required.}
 
-\item{y}{The latitude in decimal degrees.}
+\item{y}{The latitude in decimal degrees. Required.}
 
-\item{max_length}{The maximum segment length in meters to split the NHD reach into. Default is 25 meters. Passed to [odeqcdr::split_lines]. The smaller the distance the longer the operation takes.}
+\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value.}
 
-\item{return_sf}{Boolean. A TRUE value will return the sf object with data frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
+\item{return_sf}{Boolean. A TRUE value will return the sf object with data
+frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
 FALSE will return the measure value as a character. Default is FALSE.}
 }
 \value{
 sf object with data frame columns for Permanent_Identifier, ReachCode, measure, and snap_distance
 }
 \description{
-The function will query Oregon DEQ's NHD feature service to determine the measure value along a target NHD flowline. The Permanent Identifier (pid) is
-used to select a specific reach from the feature service. The x and y coordinates are snapped to the nearest vertex on the selected flowline and the measure value determined.
-If return_sf=TRUE the sf is projected into ESPG:4326 (WGS84) which is the expected default for [leaflet].
+The function will query Oregon DEQ's NHD REST service to determine the measure
+value along a target NHD flowline. The Permanent Identifier (pid) is used to
+select a specific reach from the REST service. The x and y coordinates are snapped
+to the nearest vertex on the selected flowline and the measure value determined.
+If return_sf=TRUE the sf object is projected into ESPG:4326 (WGS84) which is
+the expected default for [leaflet].
 }
 \details{
-This function is intended to be a helper function for [odeqcdr::launch_map] although it may be used independently as well.
+This function is intended to be a helper function for [launch_map] although it
+may be used independently as well. Compatible with piping.
 
 The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1
 }

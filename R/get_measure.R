@@ -1,53 +1,60 @@
-#' Get measure value along Oregon DEQ's NHDH_OR_931v220.
+#' Get measure value along Oregon NHDH_OR_931v220.
 #'
-#' The function will query Oregon DEQ's NHD feature service to determine the measure value along a target NHD flowline. The Permanent Identifier (pid) is
-#' used to select a specific reach from the feature service. The x and y coordinates are snapped to the nearest vertex on the selected flowline and the measure value determined.
-#' If return_sf=TRUE the sf is projected into ESPG:4326 (WGS84) which is the expected default for [leaflet].
+#' The function will query Oregon DEQ's NHD REST service to determine the measure
+#' value along a target NHD flowline. The Permanent Identifier (pid) is used to
+#' select a specific reach from the REST service. The x and y coordinates are snapped
+#' to the nearest vertex on the selected flowline and the measure value determined.
+#' If return_sf=TRUE the sf object is projected into ESPG:4326 (WGS84) which is
+#' the expected default for [leaflet].
 #'
-#' This function is intended to be a helper function for [odeqcdr::launch_map] although it may be used independently as well.
+#' This function is intended to be a helper function for [launch_map] although it
+#' may be used independently as well. Compatible with piping.
 #'
 #' The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1
 #'
-#' @param pid The NHD Permanent_Identifier value as a string.
-#' @param x The longitude in decimal degrees.
-#' @param y The latitude in decimal degrees.
-#' @param max_length The maximum segment length in meters to split the NHD reach into. Default is 25 meters. Passed to [odeqcdr::split_lines]. The smaller the distance the longer the operation takes.
-#' @param return_sf Boolean. A TRUE value will return the sf object with data frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
-#' FALSE will return the measure value as a character. Default is FALSE.
+#' @param pid The NHD Permanent_Identifier value as a string. Required.
+#' @param x The longitude in decimal degrees. Required.
+#' @param y The latitude in decimal degrees. Required.
+#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
+#'  Typically entered using the numeric EPSG value.
+#' @param return_sf Boolean. A TRUE value will return the sf object with data
+#'      frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
+#'      FALSE will return the measure value as a character. Default is FALSE.
 #' @export
 #' @return sf object with data frame columns for Permanent_Identifier, ReachCode, measure, and snap_distance
+get_measure <- function(pid, x, y, crs, return_sf=FALSE){
 
-get_measure <- function(pid, x, y, max_length=25, return_sf=FALSE){
+  df <- purrr::pmap_dfr(list(pid, x, y, crs), return_sf = TRUE,
+                        .f = get_measure_)
+
+}
+
+#' Work horse function. Non vectorized. Retrieves geometry from REST service
+#' using PID. This is primarily for use with [launch_map]
+#'
+#' @noRd
+get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 
   # Test data
   #pid="165555667"
   #reachcode="18010206003567"
+  #crs=4326
   #y=42.09361
   #x=-122.3822
 
   # web mercator
-  to_crs <- 3857
-
-  # NAD 83
-  #to_crs <- 4269
-
-  #   request <- httr::GET(url = paste0(query_url , "ReachCode='",reachcode,"'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON"))
-  #   response <- httr::content(request, as = "text", encoding = "UTF-8")
-
-  # get the site, make sf object, NAD 83 EPSG:4269
-  site <- sf::st_as_sf(data.frame(Longitude = x, Latitude = y), coords = c("Longitude", "Latitude"), crs = 4269) %>%
-    sf::st_transform(crs = to_crs)
+  #to_crs <- 3857
 
   query_url  <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1/query?where="
 
-  request <- httr::GET(url = URLencode(paste0(query_url , "Permanent_Identifier='",pid,"'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON")))
+  request <- httr::GET(url = URLencode(paste0(query_url , "Permanent_Identifier='",pid,
+                                              "'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON")))
 
   response <- httr::content(request, as = "text", encoding = "UTF-8")
 
-  reach_df <- geojsonsf::geojson_sf(response) %>%
-    sf::st_drop_geometry()
+  line_df <- geojsonsf::geojson_sf(response)
 
-  if (httr::http_error(request) | NROW(reach_df) == 0) {
+  if (httr::http_error(request) | NROW(line_df) == 0) {
     warning("Error, NA returned")
 
     if (return_sf) {
@@ -59,12 +66,23 @@ get_measure <- function(pid, x, y, max_length=25, return_sf=FALSE){
                dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, geometry) %>%
                sf::st_transform(crs = 4326))
     } else {
-      return(NA_real_)
+      return(NA_character_)
     }
   }
 
+  # feature service out crs, WGS84
+  fs_crs <- 4326
+
+  # Make a point from x and y  and make sure it's in the same projection as the line
+  point <- sf::st_as_sf(data.frame(Longitude = x, Latitude = y),
+                        coords = c("Longitude", "Latitude"), crs = crs) %>%
+    sf::st_transform(point, crs = sf::st_crs(line_df))
+
+  reach_df <- line_df %>%
+    sf::st_drop_geometry()
+
   # get measure value at top and bottom
-  reach <- geojsonsf::geojson_sf(response) %>%
+  reach <- line_df %>%
     sf::st_cast( to = "POINT") %>%
     dplyr::mutate(Measure = unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE))
 
@@ -74,11 +92,11 @@ get_measure <- function(pid, x, y, max_length=25, return_sf=FALSE){
   rm(reach)
 
   # Split line into segments
-  reach1 <- geojsonsf::geojson_sf(response) %>%
-    sf::st_transform(crs = to_crs) %>%
+  reach1 <- line_df %>%
+    sf::st_transform(crs = fs_crs) %>%
     sf::st_cast(to = "LINESTRING") %>%
     sf::st_zm() %>%
-    split_lines(max_length = max_length, id = "ReachCode")
+    split_lines(max_length = 25, id = "ReachCode")
 
   # segment length in meters
   reach1$length_seg <- units::set_units(sf::st_length(reach1), m)
@@ -93,27 +111,104 @@ get_measure <- function(pid, x, y, max_length=25, return_sf=FALSE){
   reach_points[1,c("length_seg")] <- 0
 
   # Snap distance in meters because of crs
-  reach_points$Snap_Distance <- sf::st_distance(reach_points, site, by_element = TRUE)
+  reach_points$Snap_Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
 
   if (units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
     warning("Snap distance is > 400 meters. Is the x and y near the target Reach?")
 
   # Calculate measure, filter to the closest point and clean up
-  meas_snap <- reach_points %>%
+  df_meas <- reach_points %>%
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
-                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)) %>%
-    dplyr::filter(Snap_Distance == min(Snap_Distance)) %>%
+                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2),
+                  Measure = as.character(Measure)) %>%
+    dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
     dplyr::left_join(reach_df) %>%
-    sf::st_transform(crs = 4326) %>% # for leaflet
-    #dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
-    #              Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
+    dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
+                  Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
     sf::st_zm() %>%
     dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure)
 
   if (return_sf) {
-    return(meas_snap)
+    return(df_meas)
   } else {
-    measure <- as.character(meas_snap$Measure)
+    measure <- as.character(df_meas$Measure)
+    return(measure)
+  }
+}
+
+#' Get measure value along a line
+#'
+#' Calculate the measure value given an input point and NHD line. The measure value is
+#' determined after snapping the point to the line.
+#'
+#' @param line The input NHD feature as an sf object with a geometry column.
+#' @param point The input point feature as an sf object with a geometry column
+#' @param return_df Boolean. A TRUE value will return the data
+#'      frame with columns for Measure, Snap_Lat, Snap_Long, and Snap_Distance.
+#'      FALSE will return the measure value
+#'      as a character. Default is FALSE.
+#' @export
+get_measure2 <- function(line, point, return_df=FALSE){
+
+  # feature service out crs, WGS84
+  #fs_crs <- 4326
+
+  # Make sure the point and line are in the same projection
+  point <- sf::st_transform(point, crs = sf::st_crs(line))
+
+  reach_df <- line %>%
+    sf::st_drop_geometry()
+
+  # get measure value at top and bottom
+  reach <- line %>%
+    sf::st_cast( to = "POINT") %>%
+    dplyr::mutate(Measure = unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE))
+
+  meas_max <- max(reach$Measure)
+  meas_min <- min(reach$Measure)
+
+  rm(reach)
+
+  # Split line into segments
+  reach1 <- line %>%
+    #sf::st_transform(crs = fs_crs) %>%
+    sf::st_cast(to = "LINESTRING") %>%
+    sf::st_zm() %>%
+    split_lines(max_length = 25, id = "ReachCode")
+
+  # segment length in meters
+  reach1$length_seg <- units::set_units(sf::st_length(reach1), m)
+
+  reach_points <- sf::st_cast(reach1, to = "POINT")
+  reach_points$row = as.numeric(row.names(reach_points))
+
+  # Get only the first point on each linestring segment, and the last point (most upstream). Use the row number to filter.
+  reach_points <- dplyr::filter(reach_points, row %in% c(1:nrow(reach_points),  max(reach_points$row)))
+
+  # Set first point to length zero
+  reach_points[1,c("length_seg")] <- 0
+
+  # Snap distance in meters because of crs
+  reach_points$Snap_Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
+
+  if (units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
+    warning("Snap distance is > 400 meters. Is the point near the line?")
+
+  # Calculate measure, filter to the closest point and clean up
+  df_meas <- reach_points %>%
+    dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
+                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2),
+                  Measure = as.character(Measure)) %>%
+    dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
+    dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
+                  Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
+    sf::st_drop_geometry() %>%
+    dplyr::select(Measure, Snap_Lat, Snap_Long, Snap_Distance)
+
+  if (return_df) {
+    return(df_meas)
+  } else {
+    measure <- as.character(df_meas$Measure)
     return(measure)
   }
 }
