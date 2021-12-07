@@ -1,4 +1,4 @@
-#' Get NHDplus HR info
+#' Get NHDplus HR info as a dataframe
 #'
 #' The function will query the NHDplus High Resolution (HR) feature service and return a
 #' dataframe of info for the flowline. x and y coordinates are
@@ -14,6 +14,7 @@
 #'
 #' The NDHplus High Resolution feature service is at https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/2/
 #'
+#' @param .data A data frame
 #' @param x The longitude in decimal degrees. Required. Accepts a vector.
 #' @param y The latitude in decimal degrees. Required. Accepts a vector.
 #' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs]. Typically entered using the numeric EPSG value. Accepts a vector.
@@ -21,14 +22,19 @@
 #' @export
 #' @return sf object
 
-get_nhdplushr <- function(x, y, crs, search_dist = 100){
+get_nhdplus_df <- function(x, y, crs, search_dist = 100){
 
-  if (length(x) != length(y)) {
+  if (length(.data[[deparse(substitute(x))]]) != length(.data[[deparse(substitute(y))]])) {
     stop("x and y must have the same number of elements")
   }
 
-   df <- purrr::pmap_dfr(list(x, y, crs), search_dist = search_dist,
-                          measure = measure, .f = get_nhdplushr_)
+  df <- purrr::pmap_dfr(list(.data[[deparse(substitute(x))]],
+                             .data[[deparse(substitute(y))]],
+                             .data[[deparse(substitute(crs))]]),
+                        search_dist = search_dist,
+                          .f = get_nhdplus_df_)
+  # reset row numbers
+  row.names(df) <- NULL
 
   return(df)
 
@@ -37,7 +43,7 @@ get_nhdplushr <- function(x, y, crs, search_dist = 100){
 #' Non vectorized version of get_nhdplushr . This is what purrr calls.
 #'
 #' @noRd
-get_nhdplushr <- function(x, y, crs, search_dist = 100) {
+get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
 
   # Test data
   # y=42.09359

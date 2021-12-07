@@ -2,11 +2,13 @@
 % Please edit documentation in R/get_nhd_df.R
 \name{get_nhd_df}
 \alias{get_nhd_df}
-\title{Get NHD High info}
+\title{Get NHD High info as a dataframe}
 \usage{
-get_nhd_df(x, y, crs, search_dist = 100, service = "DEQ")
+get_nhd_df(.data, x, y, crs, search_dist = 100, service = "DEQ")
 }
 \arguments{
+\item{.data}{A data frame}
+
 \item{x}{The longitude in decimal degrees. Required. Accepts a vector.}
 
 \item{y}{The latitude in decimal degrees. Required. Accepts a vector.}

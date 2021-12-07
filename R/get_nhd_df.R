@@ -1,4 +1,4 @@
-#' Get NHD High info
+#' Get NHD High info as a dataframe
 #'
 #' The function will query the NHD High REST service from Oregon DEQ or USGS and return a
 #' dataframe containing the NHD flowline info. The supplied x and y coordinates
@@ -13,6 +13,7 @@
 #' USGS's national map REST service is the most recent version of NHD high and
 #' located at https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4.
 #'
+#' @param .data A data frame
 #' @param x The longitude in decimal degrees. Required. Accepts a vector.
 #' @param y The latitude in decimal degrees. Required. Accepts a vector.
 #' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
@@ -24,22 +25,30 @@
 #' @export
 #' @return sf object with data frame columns for Permanent_Identifier, ReachCode, measure, and Snap_Distance
 
-get_nhd_df <- function(x, y, crs, search_dist = 100, service = "DEQ"){
+get_nhd_df <- function(.data, x, y, crs, search_dist = 100, service = "DEQ"){
 
-  if (length(x) != length(y)) {
+  if (length(.data[[deparse(substitute(x))]]) != length(.data[[deparse(substitute(y))]])) {
     stop("x and y must have the same number of elements")
   }
 
   if (service == "DEQ") {
 
-    df <- purrr::pmap_dfr(list(x, y, crs), search_dist = search_dist,
+    df <- purrr::pmap_dfr(list(.data[[deparse(substitute(x))]],
+                               .data[[deparse(substitute(y))]],
+                               .data[[deparse(substitute(crs))]]),
+                          search_dist = search_dist,
                           .f = get_nhd_)
   } else if (service == "USGS") {
 
-    df <- purrr::pmap_dfr(list(x, y, crs), search_dist = search_dist,
+    df <- purrr::pmap_dfr(list(.data[[deparse(substitute(x))]],
+                               .data[[deparse(substitute(y))]],
+                               .data[[deparse(substitute(crs))]]),
+                          search_dist = search_dist,
                           .f = get_nhd_usgs)
   } else { stop("service must be either 'DEQ' or 'USGS'")}
 
+  # reset row numbers
+  row.names(df) <- NULL
 
   return(df)
 
