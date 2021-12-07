@@ -4,12 +4,14 @@
 \alias{get_measure2}
 \title{Get measure value along a line}
 \usage{
-get_measure2(line, point, return_df = FALSE)
+get_measure2(line, point, id, return_df = FALSE)
 }
 \arguments{
 \item{line}{The input NHD feature as an sf object with a geometry column.}
 
 \item{point}{The input point feature as an sf object with a geometry column}
+
+\item{id}{name of ID column in line}
 
 \item{return_df}{Boolean. A TRUE value will return the data
 frame with columns for Measure, Snap_Lat, Snap_Long, and Snap_Distance.

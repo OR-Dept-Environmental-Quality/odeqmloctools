@@ -143,12 +143,13 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 #'
 #' @param line The input NHD feature as an sf object with a geometry column.
 #' @param point The input point feature as an sf object with a geometry column
+#' @param id name of ID column in line
 #' @param return_df Boolean. A TRUE value will return the data
 #'      frame with columns for Measure, Snap_Lat, Snap_Long, and Snap_Distance.
 #'      FALSE will return the measure value
 #'      as a character. Default is FALSE.
 #' @export
-get_measure2 <- function(line, point, return_df=FALSE){
+get_measure2 <- function(line, point, id, return_df=FALSE){
 
   # feature service out crs, WGS84
   #fs_crs <- 4326
@@ -174,7 +175,7 @@ get_measure2 <- function(line, point, return_df=FALSE){
     #sf::st_transform(crs = fs_crs) %>%
     sf::st_cast(to = "LINESTRING") %>%
     sf::st_zm() %>%
-    split_lines(max_length = 25, id = "ReachCode")
+    split_lines(max_length = 25, id = id)
 
   # segment length in meters
   reach1$length_seg <- units::set_units(sf::st_length(reach1), m)
