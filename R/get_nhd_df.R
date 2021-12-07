@@ -209,7 +209,7 @@ get_nhd_usgs <- function(x, y, crs, search_dist = 100) {
                   MainPath = MAINPATH,
                   geometry)
 
-  df_meas <- get_measure2(line = reach_df2, point = site, return_df = TRUE)
+  df_meas <- get_measure2(line = reach_df2, point = site, id = "ReachCode", return_df = TRUE)
   reach_df3 <- cbind(reach_df2, df_meas)
 
   return(reach_df3)
