@@ -17,7 +17,7 @@ launch_map <- function(mloc, px_ht=470){
 
   px_ht <- paste0(px_ht,"px")
 
-  missing_cols <- df_mloc()[,!make.names(odeqcdr::cols_mloc()) %in% names(df.mloc2)]
+  missing_cols <- df_mloc()[,!make.names(odeqcdr::cols_mloc()) %in% names(mloc)]
 
   mloc <- cbind(mloc, missing_cols)
 
