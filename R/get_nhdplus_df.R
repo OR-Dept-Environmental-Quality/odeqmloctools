@@ -22,7 +22,7 @@
 #' @export
 #' @return sf object
 
-get_nhdplus_df <- function(x, y, crs, search_dist = 100){
+get_nhdplus_df <- function(.data, x, y, crs, search_dist = 100){
 
   if (length(.data[[deparse(substitute(x))]]) != length(.data[[deparse(substitute(y))]])) {
     stop("x and y must have the same number of elements")
@@ -92,14 +92,15 @@ get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
 
   reach_df$snap_distance <- sf::st_distance(site, reach_df, by_element = TRUE)
 
-  reach_df <- reach_df %>%
-    dplyr::select(dplyr::everything(-geometry), geometry)
+  #reach_df <- reach_df %>%
+    #dplyr::select(dplyr::everything(-geometry), geometry)
 
   # return row that is closest
   reach_df2 <- reach_df %>%
     dplyr::slice_min(snap_distance, with_ties = FALSE)
 
-  df_meas <- get_measure2(line = reach_df2, point = site, return_sf = TRUE)
+  df_meas <- get_measure2(line = reach_df2, point = site, id = "REACHCODE",
+                          return_df = TRUE)
   reach_df3 <- cbind(reach_df2, df_meas)
 
   return(reach_df3)
