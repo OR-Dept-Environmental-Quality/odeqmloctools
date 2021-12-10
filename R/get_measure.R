@@ -119,8 +119,8 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
   # Calculate measure, filter to the closest point and clean up
   df_meas <- reach_points %>%
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
-                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2),
-                  Measure = as.character(Measure)) %>%
+                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
+                  ) %>%
     dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
     dplyr::left_join(reach_df) %>%
     dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
@@ -131,8 +131,7 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
   if (return_sf) {
     return(df_meas)
   } else {
-    measure <- as.character(df_meas$Measure)
-    return(measure)
+    return(df_meas$Measure)
   }
 }
 
@@ -198,8 +197,8 @@ get_measure2 <- function(line, point, id, return_df=FALSE){
   # Calculate measure, filter to the closest point and clean up
   df_meas <- reach_points %>%
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
-                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2),
-                  Measure = as.character(Measure)) %>%
+                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
+                  ) %>%
     dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
     dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
                   Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
@@ -209,7 +208,6 @@ get_measure2 <- function(line, point, id, return_df=FALSE){
   if (return_df) {
     return(df_meas)
   } else {
-    measure <- as.character(df_meas$Measure)
-    return(measure)
+    return(df_meas$Measure)
   }
 }
