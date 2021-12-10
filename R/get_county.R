@@ -13,9 +13,9 @@
 #' @export
 #' @return string of county basename
 get_county <- function(x, y, crs) {
-  vals <- purrr::pmap(list(x, y, crs), .f = get_county_)
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_county_)
 
-  return(vals)
+  return(df$BASENAME)
 }
 
 
@@ -55,5 +55,5 @@ get_county_ <- function(x, y, crs){
     return(NA_character_)
   }
 
-  return(df$BASENAME)
+  return(df)
 }

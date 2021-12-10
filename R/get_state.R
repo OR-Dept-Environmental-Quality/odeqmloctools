@@ -13,8 +13,8 @@
 #' @export
 #' @return state code
 get_state <- function(x, y, crs){
-  vals <- purrr::pmap(list(x, y, crs), .f = get_state_)
-  return(vals)
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_state_)
+  return(df$STUSAB)
   }
 
 
@@ -56,5 +56,5 @@ get_state_ <- function(x, y, crs){
     return(NA_character_)
   }
 
-  return(df$STUSAB)
+  return(df)
 }
