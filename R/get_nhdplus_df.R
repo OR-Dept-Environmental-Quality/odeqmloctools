@@ -36,7 +36,9 @@ get_nhdplus_df <- function(.data, x, y, crs, search_dist = 100){
   # reset row numbers
   row.names(df) <- NULL
 
-  return(df)
+  df2 <- cbind(.data, df)
+
+  return(df2)
 
 }
 
@@ -46,10 +48,10 @@ get_nhdplus_df <- function(.data, x, y, crs, search_dist = 100){
 get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
 
   # Test data
-  # y=42.09359
-  # x=-122.3813
-  # search_dist = 100
-  # crs = 4236
+  # y <- 42.09359
+  # x <- -122.3813
+  # search_dist <- 100
+  # crs <- 4236
 
   # Idaho (error)
   # y = 44.24176
@@ -79,7 +81,7 @@ get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
     warning("Error, NA returned")
 
     return(dplyr::mutate(site,
-                         Measure = NA_character_,
+                         Measure = NA_real_,
                          Snap_Lat = NA_real_,
                          Snap_Long = NA_real_,
                          Snap_Distance = units::set_units(NA_real_, m)) %>%
@@ -97,10 +99,12 @@ get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
 
   # return row that is closest
   reach_df2 <- reach_df %>%
-    dplyr::slice_min(snap_distance, with_ties = FALSE)
+    dplyr::slice_min(snap_distance, with_ties = FALSE) %>%
+    dplyr::mutate(HWTYPE = as.numeric(HWTYPE),
+                  HWNODESQKM = as.numeric(HWNODESQKM))
 
   df_meas <- get_measure2(line = reach_df2, point = site, id = "REACHCODE",
-                          return_df = TRUE)
+                          return_df = TRUE, nhdplus = TRUE)
   reach_df3 <- cbind(reach_df2, df_meas)
 
   return(reach_df3)
