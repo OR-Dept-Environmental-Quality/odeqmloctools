@@ -11,7 +11,7 @@ launch_map(mloc, px_ht = 470)
 Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name', 'Latitude', and 'Longitude'.
 Other columns are optional but will be added if not present and the values set to NA.
 The full set of mloc column names can be generated using [odeqcdr::cols_mloc] or
-as a data frame using [df_mloc].}
+as a data frame using [df_mloc]. 'Snap.Lat' and 'Snap.Long' are added}
 
 \item{px_ht}{Height of the map in pixels. Default is 470 which fits on most standard laptop screens. The minimum height is 300 pixels.}
 }

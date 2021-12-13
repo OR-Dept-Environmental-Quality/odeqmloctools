@@ -4,7 +4,7 @@
 #'    Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name', 'Latitude', and 'Longitude'.
 #'    Other columns are optional but will be added if not present and the values set to NA.
 #'    The full set of mloc column names can be generated using [odeqcdr::cols_mloc] or
-#'    as a data frame using [df_mloc].
+#'    as a data frame using [df_mloc]. 'Snap.Lat' and 'Snap.Long' are added
 #' @param px_ht Height of the map in pixels. Default is 470 which fits on most standard laptop screens. The minimum height is 300 pixels.
 #' @export
 #' @return Launches a leaflet map within a Shiny app. Returns mloc data frame with any saved changes on app close.
@@ -17,7 +17,7 @@ launch_map <- function(mloc, px_ht=470){
 
   px_ht <- paste0(px_ht,"px")
 
-  missing_cols <- df_mloc()[,!make.names(odeqcdr::cols_mloc()) %in% names(mloc)]
+  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "Snap.Lat", "Snap.Long")) %in% names(mloc)]
 
   mloc <- cbind(mloc, missing_cols)
 
@@ -27,56 +27,60 @@ launch_map <- function(mloc, px_ht=470){
 
   app <- shiny::shinyApp(
 
+    # Shiny UI -----
     ui = shiny::shinyUI(shiny::fluidPage(shiny::tags$head(shiny::tags$style('.selectize-dropdown {z-index: 10000}')),
-                                         shiny::fluidRow(shiny::column(width=4, shiny::selectInput(inputId="selectStation",
-                                                                                                   label="Zoom to Monitoring Location",
+                                         shiny::fluidRow(shiny::column(width = 4, shiny::selectInput(inputId = "selectStation",
+                                                                                                   label = "Zoom to Monitoring Location",
                                                                                                    choices = unique(df.mloc$choices),
-                                                                                                   multiple=FALSE, width="100%", selectize=TRUE)),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="NEXT", label="Next MLoc", style = "margin-top: 25px;"), align = "left"),
-                                                         shiny::column(width=2, shiny::selectizeInput(inputId="mlocTypeSelect", label="Monitoring Location Type",
-                                                                                                      choices = c("",odeqcdr::valid_values(col="Monitoring Location Type")),
-                                                                                                      multiple = FALSE, width='100%',
+                                                                                                   multiple = FALSE, width = "100%", selectize = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "NEXT", label = "Next MLoc", style = "margin-top: 25px;"), align = "left"),
+                                                         shiny::column(width = 2, shiny::selectizeInput(inputId = "mlocTypeSelect", label = "Monitoring Location Type",
+                                                                                                      choices = c("",odeqcdr::valid_values(col = "Monitoring Location Type")),
+                                                                                                      multiple = FALSE, width = '100%',
                                                                                                       options = list(create = TRUE))),
-                                                         shiny::column(width=2, shiny::verbatimTextOutput("STATUSprintout", placeholder=TRUE), style = "margin-top: 25px;"),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="STATUSsave", label="Update Status", style = "margin-top: 25px;"), align = "left")),
+                                                         shiny::column(width = 2, shiny::verbatimTextOutput("STATUSprintout", placeholder = TRUE), style = "margin-top: 25px;"),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "STATUSsave", label = "Update Status", style = "margin-top: 25px;"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width=1, shiny::h6("NHD Info"), align = "right"),
-                                                         shiny::column(width=4, shiny::verbatimTextOutput("NHDprintout", placeholder=TRUE)),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="NHDsave", label="Save NHD Info", style = "margin-top: 0px;"), align = "left"),
-                                                         shiny::column(width=1, shiny::h6("Click Lat/Long"), align = "right"),
-                                                         shiny::column(width=3, shiny::verbatimTextOutput("XYprintout", placeholder=TRUE)),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="XYsave", label="Save Lat/Long", style = "margin-top: 0px;"), align = "left")),
+                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("NHD Info"), align = "right"),
+                                                         shiny::column(width = 4, shiny::verbatimTextOutput("NHDprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "NHDsave", label = "Save NHD Info", style = "margin-top: 0px;"), align = "left"),
+                                                         shiny::column(width = 1, shiny::h6("Click Lat/Long"), align = "right"),
+                                                         shiny::column(width = 3, shiny::verbatimTextOutput("XYprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "XYsave", label = "Save Lat/Long", style = "margin-top: 0px;"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width=1, shiny::h6("LLID Info"), align = "right"),
-                                                         shiny::column(width=4, shiny::verbatimTextOutput("LLIDprintout", placeholder=TRUE)),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="LLIDsave", label="Save LLID Info", style = "margin-top: 0px;"), align = "left"),
-                                                         shiny::column(width=1, shiny::h6("AWQMS Alt ID"), align = "right"),
-                                                         shiny::column(width=3, shiny::verbatimTextOutput("AWQMSprintout", placeholder=TRUE)),
-                                                         shiny::column(width=1, shiny::actionButton(inputId="AWQMSsave", label="Save Alt ID"), align = "left")),
+                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("LLID Info"), align = "right"),
+                                                         shiny::column(width = 4, shiny::verbatimTextOutput("LLIDprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "LLIDsave", label = "Save LLID Info", style = "margin-top: 0px;"), align = "left"),
+                                                         shiny::column(width = 1, shiny::h6("AWQMS Alt ID"), align = "right"),
+                                                         shiny::column(width = 3, shiny::verbatimTextOutput("AWQMSprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "AWQMSsave", label = "Save Alt ID"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width=12, leaflet::leafletOutput(outputId="map", width = "100%", height = px_ht))),
-                                         shiny::fluidRow(shiny::column(width=1, shiny::actionButton(inputId="return_df", label="Close App, Return Changes", style = "margin-top: 5px;"))))
+                                         shiny::fluidRow(shiny::column(width = 12, leaflet::leafletOutput(outputId = "map", width = "100%", height = px_ht))),
+                                         shiny::fluidRow(shiny::column(width = 1, shiny::actionButton(inputId = "return_df", label = "Close App, Return Changes", style = "margin-top: 5px;"))))
     ),
-
+    # Shiny server -----
     server = shiny::shinyServer(function(input, output, session) {
 
-      # Click Reactive Values
-      cr <- shiny::reactiveValues(Monitoring.Location.Status.ID=NULL,
-                                  Monitoring.Location.Type=NULL,
-                                  Permanent.Identifier=NULL,
-                                  Reachcode=NULL,
-                                  Measure=NULL,
-                                  LLID=NULL,
-                                  River.Mile=NULL,
-                                  Latitude=NULL,
-                                  Longitude=NULL,
-                                  Alternate.ID.1=NULL,
-                                  Alternate.Context.1=NULL,
-                                  df=NULL)
+      # cr reactive Values ----
+      cr <- shiny::reactiveValues(Monitoring.Location.Status.ID = NULL,
+                                  Monitoring.Location.Type = NULL,
+                                  Permanent.Identifier = NULL,
+                                  Reachcode = NULL,
+                                  Measure = NULL,
+                                  LLID = NULL,
+                                  River.Mile = NULL,
+                                  Latitude = NULL,
+                                  Longitude = NULL,
+                                  Alternate.ID.1 = NULL,
+                                  Alternate.Context.1 = NULL,
+                                  Snap.Lat = NULL,
+                                  Snap.Long = NULL,
+                                  df = NULL)
 
       # Populate with initial mloc data frame
       cr$df <- df.mloc
 
+      # df reactive -----
       # Retrieve cr$df from currently selected station
       df_reactive <- shiny::reactive({
         df.selectStation <- cr$df %>%
@@ -89,8 +93,9 @@ launch_map <- function(mloc, px_ht=470){
         # Get current station info
         zoom_mloc <- df_reactive()
 
+        # -Map ----
         map <- leaflet::leaflet(options = leaflet::leafletOptions(minZoom = 1, maxZoom = 22)) %>%
-          leaflet::setView(lng=zoom_mloc$Longitude[1], lat=zoom_mloc$Latitude[1], zoom = 18) %>%
+          leaflet::setView(lng = zoom_mloc$Longitude[1], lat = zoom_mloc$Latitude[1], zoom = 18) %>%
           leafem::addMouseCoordinates() %>%
           leaflet::addMapPane("Base", zIndex = 150) %>%
           leaflet::addMapPane("Aerial2", zIndex = 300) %>%
@@ -98,196 +103,208 @@ launch_map <- function(mloc, px_ht=470){
           leaflet::addMapPane("huc8", zIndex = 350) %>%
           leaflet::addMapPane("huc10", zIndex = 351) %>%
           leaflet::addMapPane("huc12", zIndex = 352) %>%
-          leaflet::addMapPane("Points_AWQMS", zIndex= 405) %>%
+          leaflet::addMapPane("Points_AWQMS", zIndex = 405) %>%
           leaflet::addMapPane("Select", zIndex = 410) %>%
           leaflet::addMapPane("Lines", zIndex = 420) %>%
-          leaflet::addMapPane("Points_Review", zIndex= 600) %>%
-          leaflet.esri::addEsriTiledMapLayer(url =  "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer",
-                                             options = leaflet::leafletOptions(pane="Base")) %>%
+          leaflet::addMapPane("Points_Review", zIndex = 600) %>%
+          # -Basemaps ----
+        leaflet.esri::addEsriTiledMapLayer(url = "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer",
+                                           options = leaflet::leafletOptions(pane = "Base")) %>%
           leaflet::addTiles(urlTemplate = "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                            options= leaflet::tileOptions(opacity=0.7)) %>%
+                            options = leaflet::tileOptions(opacity = 0.7)) %>%
           #leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery,
           #                          group = "World Imagery",
           #                          options = leaflet::leafletOptions(pane="Aerial1")) %>%
-          leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
+          leaflet.esri::addEsriImageMapLayer(url = "https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
                                              group = "Oregon Imagery",
-                                             options = leaflet::leafletOptions(pane="Aerial2")) %>%
-          leaflet.esri::addEsriImageMapLayer(url="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
+                                             options = leaflet::leafletOptions(pane = "Aerial2")) %>%
+          leaflet.esri::addEsriImageMapLayer(url = "https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
                                              group = "Oregon Imagery",
-                                             options = leaflet::leafletOptions(pane="Aerial2")) %>%
-          leaflet::addWMSTiles(baseUrl="https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
+                                             options = leaflet::leafletOptions(pane = "Aerial2")) %>%
+          leaflet::addWMSTiles(baseUrl = "https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
                                group = "Hydrography",
                                options = leaflet::WMSTileOptions(format = "image/png",
                                                                  transparent = TRUE,
-                                                                 pane= "Hydro"),
+                                                                 pane = "Hydro"),
                                attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
                                layers = "0") %>%
-          leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1",
-                                            group = "NHD Streams",
-                                            layerId = "NHD",
-                                            fitBounds = FALSE,
-                                            stroke=TRUE,
-                                            weight=2,
-                                            fill=FALSE,
-                                            options = leaflet::leafletOptions(pane="Lines", minZoom = 12),
-                                            highlightOptions = leaflet::highlightOptions(color="black",
-                                                                                         weight = 4,
-                                                                                         fillOpacity = 0.8,
-                                                                                         bringToFront = TRUE,
-                                                                                         sendToBack = TRUE),
-                                            labelOptions = leaflet::labelOptions(offset = c(0,0),
-                                                                                 opacity = 0.9,
-                                                                                 textsize = "14px",
-                                                                                 sticky = TRUE),
-                                            labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\": \"+props.ReachCode+\" \"}")
-          ) %>%
-          leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0",
-                                            group = "LLID Streams",
-                                            layerId = "LLID",
-                                            useServiceSymbology = FALSE,
-                                            fitBounds = FALSE,
-                                            stroke=TRUE,
-                                            weight=2,
-                                            fill=FALSE,
-                                            options = leaflet::leafletOptions(pane="Lines", minZoom = 10),
-                                            highlightOptions = leaflet::highlightOptions(color="black",
-                                                                                         weight = 4,
-                                                                                         fillOpacity = 0.8,
-                                                                                         bringToFront = TRUE,
-                                                                                         sendToBack = TRUE),
-                                            labelOptions = leaflet::labelOptions(offset = c(0,0),
-                                                                                 opacity = 0.9,
-                                                                                 textsize = "14px",
-                                                                                 sticky = TRUE),
-                                            labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.NAME+\": \"+props.LLID+\" \"}")
-          ) %>%
-          leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/1",
-                                            group = "AWQMS Stations",
-                                            layerId = "AWQMS_Stations1",
-                                            fillOpacity = 0.5,
-                                            fitBounds = FALSE,
-                                            options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
-                                            markerOptions = leaflet::markerOptions(zIndexOffset = 0,
-                                                                                   riseOnHover = TRUE),
-                                            labelOptions = leaflet::labelOptions(offset = c(0,0),
-                                                                                 opacity = 0.9,
-                                                                                 textsize = "14px",
-                                                                                 sticky = FALSE),
-                                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
-                                            labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.MLocID+\": \"+props.StationDes+\" \"}"),
-                                            popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-                                                                                   '<b>Monitoring.Location.ID:</b> \"+props.MLocID+\"',
-                                                                                   '<br><b>Monitoring.Location.Name:</b> \"+props.StationDes+\"',
-                                                                                   '<br><b>Alternate.Context/OrgID:</b> \"+props.OrgID+\"',
-                                                                                   '<br><b>Monitoring.Location.Type:</b> \"+props.MonLocType+\"',
-                                                                                   '<br><b>GNIS Name:</b> \"+props.GNIS_Name+\"',
-                                                                                   '<br><b>Reachcode:</b> \"+props.Reachcode+\"',
-                                                                                   '<br><b>Measure:</b> \"+props.Measure+\"',
-                                                                                   '<br><b>Permanent.Identifier:</b> \"+props.Permanent_Identifier+\"',
-                                                                                   ' \"}'))
-          ) %>%
-          leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/0",
-                                            group = "AWQMS Stations",
-                                            layerId = "AWQMS_Stations0",
-                                            fillOpacity = 0.5,
-                                            fitBounds = FALSE,
-                                            options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
-                                            markerOptions = leaflet::markerOptions(zIndexOffset = 0,
-                                                                                   riseOnHover = TRUE),
-                                            labelOptions = leaflet::labelOptions(offset = c(0,0),
-                                                                                 opacity = 0.9,
-                                                                                 textsize = "14px",
-                                                                                 sticky = FALSE),
-                                            popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
-                                            labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.station_key+\": \"+props.StationDes+\" \"}"),
-                                            popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
-                                                                                   '<b>Monitoring.Location.ID:</b> \"+props.station_key+\"',
-                                                                                   '<br><b>Monitoring.Location.Name:</b> \"+props.StationDes+\"',
-                                                                                   '<br><b>Alternate.Context/OrgID:</b> \"+props.ORGID+\"',
-                                                                                   '<br><b>Monitoring.Location.Type:</b> \"+props.MonLocType+\"',
-                                                                                   '<br><b>GNIS Name:</b> \"+props.GNIS_Name+\"',
-                                                                                   '<br><b>Reachcode:</b> \"+props.Reachcode+\"',
-                                                                                   '<br><b>Measure:</b> \"+props.Measure+\"',
-                                                                                   '<br><b>Permanent.Identifier:</b> \"+props.Permanent_Identifier+\"',
-                                                                                   ' \"}'))
-          )
+          # NHD ----
+        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1",
+                                          group = "NHD Streams",
+                                          layerId = "NHD",
+                                          fitBounds = FALSE,
+                                          stroke = TRUE,
+                                          weight = 2,
+                                          fill = FALSE,
+                                          options = leaflet::leafletOptions(pane = "Lines", minZoom = 12),
+                                          highlightOptions = leaflet::highlightOptions(color = "black",
+                                                                                       weight = 4,
+                                                                                       fillOpacity = 0.8,
+                                                                                       bringToFront = TRUE,
+                                                                                       sendToBack = TRUE),
+                                          labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                               opacity = 0.9,
+                                                                               textsize = "14px",
+                                                                               sticky = TRUE),
+                                          labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\": \"+props.ReachCode+\" \"}")
+        ) %>%
+          # LLID ----
+        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0",
+                                          group = "LLID Streams",
+                                          layerId = "LLID",
+                                          useServiceSymbology = FALSE,
+                                          fitBounds = FALSE,
+                                          stroke = TRUE,
+                                          weight = 2,
+                                          fill = FALSE,
+                                          options = leaflet::leafletOptions(pane = "Lines", minZoom = 10),
+                                          highlightOptions = leaflet::highlightOptions(color = "black",
+                                                                                       weight = 4,
+                                                                                       fillOpacity = 0.8,
+                                                                                       bringToFront = TRUE,
+                                                                                       sendToBack = TRUE),
+                                          labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                               opacity = 0.9,
+                                                                               textsize = "14px",
+                                                                               sticky = TRUE),
+                                          labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.NAME+\": \"+props.LLID+\" \"}")
+        ) %>%
+          # 1 AWQMS Stations ----
+        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/1",
+                                          group = "AWQMS Stations",
+                                          layerId = "AWQMS_Stations1",
+                                          fillOpacity = 0.5,
+                                          fitBounds = FALSE,
+                                          options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
+                                          markerOptions = leaflet::markerOptions(zIndexOffset = 0,
+                                                                                 riseOnHover = TRUE),
+                                          labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                               opacity = 0.9,
+                                                                               textsize = "14px",
+                                                                               sticky = FALSE),
+                                          popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                          labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.MLocID+\": \"+props.StationDes+\" \"}"),
+                                          popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                                 '<b>Monitoring.Location.ID:</b> \"+props.MLocID+\"',
+                                                                                 '<br><b>Monitoring.Location.Name:</b> \"+props.StationDes+\"',
+                                                                                 '<br><b>Alternate.Context/OrgID:</b> \"+props.OrgID+\"',
+                                                                                 '<br><b>Monitoring.Location.Type:</b> \"+props.MonLocType+\"',
+                                                                                 '<br><b>GNIS Name:</b> \"+props.GNIS_Name+\"',
+                                                                                 '<br><b>Reachcode:</b> \"+props.Reachcode+\"',
+                                                                                 '<br><b>Measure:</b> \"+props.Measure+\"',
+                                                                                 '<br><b>Permanent.Identifier:</b> \"+props.Permanent_Identifier+\"',
+                                                                                 ' \"}'))
+        ) %>%
+          # 0 AWQMS Stations ----
+        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/0",
+                                          group = "AWQMS Stations",
+                                          layerId = "AWQMS_Stations0",
+                                          fillOpacity = 0.5,
+                                          fitBounds = FALSE,
+                                          options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
+                                          markerOptions = leaflet::markerOptions(zIndexOffset = 0,
+                                                                                 riseOnHover = TRUE),
+                                          labelOptions = leaflet::labelOptions(offset = c(0,0),
+                                                                               opacity = 0.9,
+                                                                               textsize = "14px",
+                                                                               sticky = FALSE),
+                                          popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                          labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.station_key+\": \"+props.StationDes+\" \"}"),
+                                          popupProperty = htmlwidgets::JS(paste0('function(feature){var props = feature.properties; return \"',
+                                                                                 '<b>Monitoring.Location.ID:</b> \"+props.station_key+\"',
+                                                                                 '<br><b>Monitoring.Location.Name:</b> \"+props.StationDes+\"',
+                                                                                 '<br><b>Alternate.Context/OrgID:</b> \"+props.ORGID+\"',
+                                                                                 '<br><b>Monitoring.Location.Type:</b> \"+props.MonLocType+\"',
+                                                                                 '<br><b>GNIS Name:</b> \"+props.GNIS_Name+\"',
+                                                                                 '<br><b>Reachcode:</b> \"+props.Reachcode+\"',
+                                                                                 '<br><b>Measure:</b> \"+props.Measure+\"',
+                                                                                 '<br><b>Permanent.Identifier:</b> \"+props.Permanent_Identifier+\"',
+                                                                                 ' \"}'))
+        )
 
         map <- map %>%
-          leaflet::addAwesomeMarkers(data = cr$df,
-                                     group ="Review Stations",
-                                     layerId = df.mloc$choices,
-                                     popup = ~paste0("<b>Monitoring.Location.ID:</b> ", Monitoring.Location.ID, "<br>",
-                                                     "<b>Monitoring.Location.Name:</b> ", Monitoring.Location.Name, "<br>",
-                                                     "<b>Monitoring.Location.Type:</b> ", Monitoring.Location.Type, "<br>",
-                                                     "<b>Latitude:</b> ", Latitude, "<br>",
-                                                     "<b>Alternate.ID.1:</b> ", Alternate.ID.1, "<br>",
-                                                     "<b>Alternate.Context.1:</b> ", Alternate.Context.1, "<br>",
-                                                     "<b>Reachcode:</b> ", Reachcode, "<br>",
-                                                     "<b>Measure:</b> ", Measure, "<br>",
-                                                     "<b>LLID:</b> ", LLID, "<br>",
-                                                     "<b>River.Mile:</b> ", River.Mile, "<br>",
-                                                     "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>"),
-                                     label = ~paste0(Monitoring.Location.ID, ": ", Monitoring.Location.Name),
-                                     lat = ~Latitude,
-                                     lng = ~Longitude,
-                                     icon = leaflet::awesomeIcons(icon = "glyphicon-none",
-                                                                  iconColor = 'black',
-                                                                  library = 'glyphicon',
-                                                                  markerColor = "orange"),
-                                     popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
-                                     labelOptions = list(offset = c(0,-25), opacity = 0.9, textsize = "14px", sticky = FALSE),
-                                     options = leaflet::markerOptions(zIndexOffset = 0,
-                                                                      riseOnHover = TRUE,
-                                                                      pane = "Points_Review")) %>%
-          leaflet::addLayersControl(overlayGroups = c("Review Stations",
-                                                      "AWQMS Stations",
-                                                      "NHD Streams",
-                                                      "LLID Streams",
-                                                      "Hydrography",
-                                                      "Oregon Imagery"),
-                                    options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-          leaflet::addEasyButton(leaflet::easyButton(
-            icon = "fa-globe",
-            title = "Zoom to all Review Monitoring Statons",
-            onClick = htmlwidgets::JS("function(btn, map){
+          # Review Stations ----
+        leaflet::addAwesomeMarkers(data = cr$df,
+                                   group = "Review Stations",
+                                   layerId = df.mloc$choices,
+                                   popup = ~paste0("<b>Monitoring.Location.ID:</b> ", Monitoring.Location.ID, "<br>",
+                                                   "<b>Monitoring.Location.Name:</b> ", Monitoring.Location.Name, "<br>",
+                                                   "<b>Monitoring.Location.Type:</b> ", Monitoring.Location.Type, "<br>",
+                                                   "<b>Latitude:</b> ", Latitude, "<br>",
+                                                   "<b>Alternate.ID.1:</b> ", Alternate.ID.1, "<br>",
+                                                   "<b>Alternate.Context.1:</b> ", Alternate.Context.1, "<br>",
+                                                   "<b>Reachcode:</b> ", Reachcode, "<br>",
+                                                   "<b>Measure:</b> ", Measure, "<br>",
+                                                   "<b>LLID:</b> ", LLID, "<br>",
+                                                   "<b>River.Mile:</b> ", River.Mile, "<br>",
+                                                   "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>"),
+                                   label = ~paste0(Monitoring.Location.ID, ": ", Monitoring.Location.Name),
+                                   lat = ~Latitude,
+                                   lng = ~Longitude,
+                                   icon = leaflet::awesomeIcons(icon = "glyphicon-none",
+                                                                iconColor = 'black',
+                                                                library = 'glyphicon',
+                                                                markerColor = "orange"),
+                                   popupOptions = leaflet::popupOptions(maxWidth = 600, maxHeight = 500),
+                                   labelOptions = list(offset = c(0,-25), opacity = 0.9, textsize = "14px", sticky = FALSE),
+                                   options = leaflet::markerOptions(zIndexOffset = 0,
+                                                                    riseOnHover = TRUE,
+                                                                    pane = "Points_Review")) %>%
+          # Layer Control ----
+        leaflet::addLayersControl(overlayGroups = c("Review Stations",
+                                                    "AWQMS Stations",
+                                                    "NHD Streams",
+                                                    "LLID Streams",
+                                                    "Hydrography",
+                                                    "Oregon Imagery"),
+                                  options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
+          # Easy Button ----
+        leaflet::addEasyButton(leaflet::easyButton(
+          icon = "fa-globe",
+          title = "Zoom to all Review Monitoring Statons",
+          onClick = htmlwidgets::JS("function(btn, map){
                 var groupLayer = map.layerManager.getLayerGroup('Review Stations');
                 map.fitBounds(groupLayer.getBounds());
                  }"))) %>%
-          leaflet::addMeasure(
-            position = "bottomleft",
-            primaryLengthUnit = "meters",
-            primaryAreaUnit = "sqmeters",
-            activeColor = "#3D535D",
-            completedColor = "#7D4479") %>%
+          # Measurement Tool ----
+        leaflet::addMeasure(
+          position = "bottomleft",
+          primaryLengthUnit = "meters",
+          primaryAreaUnit = "sqmeters",
+          activeColor = "#3D535D",
+          completedColor = "#7D4479") %>%
           leaflet::hideGroup(c("LLID Streams","Hydrography"))
 
         map
 
       })
 
+      # -Click Events ----
       shiny::observe({
         leaflet::leafletProxy("map") %>%
           leaflet::clearPopups()
 
         click <- input$map_geojson_click
-        if(is.null(click))
+        if (is.null(click))
           return()
 
+        # Click 0 AWQMS Stations -----
         # Non DEQ Stations only,
-        if(click$id == "AWQMS_Stations0") {
+        if (click$id == "AWQMS_Stations0") {
 
-          cr$Alternate.ID.1 <- NA
-          cr$Alternate.Context.1 <- NA
+          cr$Alternate.ID.1 <- NA_character_
+          cr$Alternate.Context.1 <- NA_character_
 
           output$AWQMSprintout <- shiny::renderPrint({
-            df <- data.frame(Alternate.ID.1=NA,
-                             Alternate.Context.1=NA)
+            df <- data.frame(Alternate.ID.1 = NA_character_,
+                             Alternate.Context.1 = NA_character_)
             df
           })
         }
 
+        # Click 1 AWQMS Stations -----
         # DEQ Stations only
-        if(click$id =="AWQMS_Stations1") {
+        if (click$id == "AWQMS_Stations1") {
 
           cr$Alternate.ID.1 <- click$properties$MLocID
           cr$Alternate.Context.1 <- click$properties$OrgID
@@ -299,6 +316,7 @@ launch_map <- function(mloc, px_ht=470){
           })
         }
 
+        # Click NHD -----
         if (click$id == "NHD") {
 
           tryCatch(
@@ -313,6 +331,9 @@ launch_map <- function(mloc, px_ht=470){
               cr$Permanent.Identifier <- click$properties$Permanent_Identifier
               cr$Reachcode <- click$properties$ReachCode
               cr$Measure <- NHDpoint$Measure
+              cr$Snap.Lat <- NHDpoint$Snap.Lat
+              cr$Snap.Long <- NHDpoint$Snap.Long
+
 
               request_NHD <- httr::GET(url = paste0("https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1/query?where=",
                                                     "ReachCode='",click$properties$ReachCode,
@@ -321,23 +342,24 @@ launch_map <- function(mloc, px_ht=470){
 
               shiny::isolate({
                 leaflet::leafletProxy("map") %>%
-                  leaflet::removeGeoJSON(layerId="reachcodeClick") %>%
-                  leaflet::removeMarker(layerId="measurePoint") %>%
+                  leaflet::removeGeoJSON(layerId = "reachcodeClick") %>%
+                  leaflet::removeMarker(layerId = "measurePoint") %>%
                   leaflet::addGeoJSON(geojson = response_NHD,
                                       layerId = "reachcodeClick",
                                       group = "NHD Streams",
-                                      fill=FALSE,
-                                      color="orange",
+                                      fill = FALSE,
+                                      color = "orange",
                                       weight = 6,
                                       opacity = 0.7,
-                                      options=leaflet::leafletOptions(pane="Select")) %>%
-                  leaflet::addCircleMarkers(data=NHDpoint,
+                                      options = leaflet::leafletOptions(pane = "Select")) %>%
+                  leaflet::addCircleMarkers(data = NHDpoint,
                                             layerId = "measurePoint",
                                             group = "NHD Streams",
-                                            color="red")
+                                            color = "red")
 
                 output$NHDprintout <- shiny::renderPrint({
-                  df <- sf::st_drop_geometry(NHDpoint)
+                  df <- sf::st_drop_geometry(NHDpoint) %>%
+                    dplyr::select(-Snap.Lat, -Snap.Long)
                   df
                 })
 
@@ -347,18 +369,19 @@ launch_map <- function(mloc, px_ht=470){
             })
         }
 
-        if(click$id=="LLID") {
+        # Click LLID -----
+        if (click$id == "LLID") {
 
           tryCatch(
 
             expr = {
 
               # LLID
-              rm_point <-get_llidrm(llid=click$properties$LLID,
-                                    x=click$lng,
-                                    y=click$lat,
-                                    max_length = 82,
-                                    return_sf=TRUE)
+              rm_point <- get_llidrm(llid = click$properties$LLID,
+                                     x = click$lng,
+                                     y = click$lat,
+                                     max_length = 82,
+                                     return_sf = TRUE)
 
               cr$LLID <- click$properties$LLID
               cr$River.Mile <- as.numeric(rm_point$River_Mile)
@@ -373,20 +396,20 @@ launch_map <- function(mloc, px_ht=470){
 
               shiny::isolate({
                 leaflet::leafletProxy("map") %>%
-                  leaflet::removeGeoJSON(layerId="llidClick") %>%
-                  leaflet::removeMarker(layerId="llidrmPoint") %>%
+                  leaflet::removeGeoJSON(layerId = "llidClick") %>%
+                  leaflet::removeMarker(layerId = "llidrmPoint") %>%
                   leaflet::addGeoJSON(geojson = response_LLID,
                                       layerId = "llidClick",
                                       group = "LLID Streams",
-                                      fill=FALSE,
-                                      color="green",
+                                      fill = FALSE,
+                                      color = "green",
                                       weight = 6,
                                       opacity = 0.7,
-                                      options=leaflet::leafletOptions(pane="Select")) %>%
-                  leaflet::addCircleMarkers(data=rm_point,
+                                      options = leaflet::leafletOptions(pane = "Select")) %>%
+                  leaflet::addCircleMarkers(data = rm_point,
                                             layerId = "llidrmPoint",
                                             group = "LLID Streams",
-                                            color="blue")
+                                            color = "blue")
 
                 output$LLIDprintout <- shiny::renderPrint({
                   df <- sf::st_drop_geometry(rm_point)
@@ -398,8 +421,9 @@ launch_map <- function(mloc, px_ht=470){
               output$LLIDprintout <- shiny::renderPrint({"Error with segment geometry."})
             })
         }
-      })
+      }, priority = 3)
 
+      # -Printouts ----
       # Populate printouts with whatever is saved into cr$df
       shiny::observeEvent(input$selectStation, {
 
@@ -419,33 +443,39 @@ launch_map <- function(mloc, px_ht=470){
           selected = mlt
         )
 
+        # XY printout ----
         output$XYprintout <- shiny::renderPrint({
           df.selectStation %>%
             dplyr::select(Latitude, Longitude)
         })
 
+        # NHD printout ----
         output$NHDprintout <- shiny::renderPrint({
           df.selectStation %>%
             dplyr::select(Permanent.Identifier, Reachcode, Measure)
         })
 
+        # LLID printout ----
         output$LLIDprintout <- shiny::renderPrint({
           df.selectStation %>%
             dplyr::select(LLID, River.Mile)
         })
+
+        # Alt ID printout ----
         output$AWQMSprintout <- shiny::renderPrint({
           df.selectStation %>%
             dplyr::select(Alternate.ID.1, Alternate.Context.1)
         })
-      })
+      }, priority = 2)
 
+      # Next MLoc button ----
       # When the next button is clicked, advance to next mloc
       shiny::observeEvent(input$NEXT, {
 
-        next.row <- grep(input$selectStation, cr$df$choices, fixed=TRUE) + 1
+        next.row <- grep(input$selectStation, cr$df$choices, fixed = TRUE) + 1
 
         next.choice <- cr$df %>%
-          dplyr::filter(row==next.row) %>%
+          dplyr::filter(row == next.row) %>%
           dplyr::pull(choices)
 
         shiny::updateSelectizeInput(
@@ -455,97 +485,111 @@ launch_map <- function(mloc, px_ht=470){
         )
 
 
-      })
+      }, priority = 1)
 
+      # Click Lat/Long ----
       # When the map is clicked, update the Lat/Long
       shiny::observeEvent(input$map_click, {
 
         output$XYprintout <- shiny::renderPrint({
 
           map_click <- input$map_click
-          if(is.null(map_click))
+          if (is.null(map_click))
             return()
 
           cr$Latitude <- map_click$lat
           cr$Longitude <- map_click$lng
 
-          df <- data.frame(Latitude=map_click$lat,
-                           Longitude=map_click$lng)
+          df <- data.frame(Latitude = map_click$lat,
+                           Longitude = map_click$lng)
           df
         })
 
-      })
+      }, priority = 1)
 
+      # Save Status button ----
       # When status button is clicked, update the Status in cr$df
       shiny::observeEvent(input$STATUSsave, {
 
         cr$df <- cr$df %>%
           dplyr::mutate(Monitoring.Location.Status.ID = dplyr::case_when(choices==input$selectStation & is.na(Monitoring.Location.Status.ID) ~ "Accepted",
                                                                          choices==input$selectStation & Monitoring.Location.Status.ID == "Accepted" ~ "Rejected",
-                                                                         choices==input$selectStation & Monitoring.Location.Status.ID == "Rejected" ~ "Accepted",
+                                                                         choices==input$selectStation & Monitoring.Location.Status.ID == "Rejected" ~ "Under Review",
+                                                                         choices==input$selectStation & Monitoring.Location.Status.ID == "Under Review" ~ "Accepted",
                                                                          TRUE ~ Monitoring.Location.Status.ID))
-
         output$STATUSprintout <- shiny::renderText({
           cr$df %>%
-            dplyr::filter(choices==input$selectStation) %>%
+            dplyr::filter(choices == input$selectStation) %>%
             dplyr::pull(Monitoring.Location.Status.ID)
         })
-      })
+      }, priority = 1)
 
+      # MLoc Type Menu ----
       # When mlocType list changed, update the Monitoring.Location.Type in cr$df
       shiny::observeEvent(input$mlocTypeSelect, {
 
         cr$df <- cr$df %>%
-          dplyr::mutate(Monitoring.Location.Type = dplyr::if_else(choices==input$selectStation,
+          dplyr::mutate(Monitoring.Location.Type = dplyr::if_else(choices == input$selectStation,
                                                                   input$mlocTypeSelect,
                                                                   Monitoring.Location.Type))
       })
 
+      # Save NHD button ----
       # When NHD button is clicked, update the NHD info in cr$df
       shiny::observeEvent(input$NHDsave, {
 
         cr$df <- cr$df %>%
-          dplyr::mutate(Reachcode = ifelse(choices==input$selectStation,
+          dplyr::mutate(Reachcode = ifelse(choices == input$selectStation,
                                            cr$Reachcode,
                                            Reachcode),
-                        Measure = dplyr::if_else(choices==input$selectStation,
+                        Measure = dplyr::if_else(choices == input$selectStation,
                                                  cr$Measure,
                                                  Measure),
-                        Permanent.Identifier = dplyr::if_else(choices==input$selectStation,
+                        Permanent.Identifier = dplyr::if_else(choices == input$selectStation,
                                                               cr$Permanent.Identifier,
-                                                              Permanent.Identifier))
+                                                              Permanent.Identifier),
+                        Snap.Lat = dplyr::if_else(choices == input$selectStation,
+                                                  cr$Snap.Lat,
+                                                  Snap.Lat),
+                        Snap.Long = dplyr::if_else(choices == input$selectStation,
+                                                   cr$Snap.Long,
+                                                   Snap.Long)
+          )
 
         output$NHDprintout <- shiny::renderText({"Success! NHD info saved."})
-      })
+      }, priority = 1)
 
+      # Save LLID button ----
       # When LLID button is clicked, update the LLID info in cr$df
       shiny::observeEvent(input$LLIDsave, {
 
         cr$df <- cr$df %>%
-          dplyr::mutate(LLID= ifelse(choices==input$selectStation,
-                                     cr$LLID,
-                                     LLID),
-                        River.Mile = dplyr::if_else(choices==input$selectStation,
+          dplyr::mutate(LLID = ifelse(choices == input$selectStation,
+                                      cr$LLID,
+                                      LLID),
+                        River.Mile = dplyr::if_else(choices == input$selectStation,
                                                     cr$River.Mile,
                                                     River.Mile))
 
         output$LLIDprintout <- shiny::renderText({"Success! LLID info saved."})
-      })
+      }, priority = 1)
 
+      # Save Alt ID button ----
       # When AWQMS button is clicked, update the Alternate ID info in cr$df
       shiny::observeEvent(input$AWQMSsave, {
 
         cr$df <- cr$df %>%
-          dplyr::mutate(Alternate.ID.1= ifelse(choices==input$selectStation,
-                                               cr$Alternate.ID.1,
-                                               Alternate.ID.1),
-                        Alternate.Context.1 = dplyr::if_else(choices==input$selectStation,
+          dplyr::mutate(Alternate.ID.1 = ifelse(choices == input$selectStation,
+                                                cr$Alternate.ID.1,
+                                                Alternate.ID.1),
+                        Alternate.Context.1 = dplyr::if_else(choices == input$selectStation,
                                                              cr$Alternate.Context.1,
                                                              Alternate.Context.1))
 
         output$AWQMSprintout <- shiny::renderText({"Success! Alternate ID saved."})
-      })
+      }, priority = 1)
 
+      # Save X/Y button ----
       # When Lat/Long button is clicked, update the Lat/Long in cr$df
       # update map
       shiny::observeEvent(input$XYsave, {
@@ -553,17 +597,17 @@ launch_map <- function(mloc, px_ht=470){
         shiny::isolate({
 
           cr$df <- cr$df %>%
-            dplyr::mutate(Latitude = ifelse(choices==input$selectStation,
+            dplyr::mutate(Latitude = ifelse(choices == input$selectStation,
                                             cr$Latitude,
                                             Latitude),
-                          Longitude = dplyr::if_else(choices==input$selectStation,
+                          Longitude = dplyr::if_else(choices == input$selectStation,
                                                      cr$Longitude,
                                                      Longitude))
 
           leaflet::leafletProxy("map") %>%
             leaflet::removeMarker(layerId = df.mloc$choices) %>%
             leaflet::addAwesomeMarkers(data = cr$df,
-                                       group ="Review Stations",
+                                       group = "Review Stations",
                                        layerId = df.mloc$choices,
                                        popup = ~paste0("<b>Monitoring.Location.ID:</b> ", Monitoring.Location.ID, "<br>",
                                                        "<b>Monitoring.Location.Name:</b> ", Monitoring.Location.Name, "<br>",
@@ -602,15 +646,16 @@ launch_map <- function(mloc, px_ht=470){
         })
 
         output$XYprintout <- shiny::renderText({"Success! Lat/Long saved."})
-      })
+      }, priority = 1)
 
+      # Return button ----
       # When close app button is pushed, return df
       shiny::observeEvent(input$return_df, {
         return_df <- cr$df
         return_df$choices <- NULL
         return_df$row <- NULL
-        shiny::stopApp(returnValue=return_df)
-      })
+        shiny::stopApp(returnValue = return_df)
+      }, priority = 0)
 
       shiny::onStop(function() {
         shiny::stopApp()
