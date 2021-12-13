@@ -40,6 +40,8 @@ df_mloc <- function() {
                    Permanent.Identifier = NA_character_,
                    Monitoring.Location.Status.ID = NA_character_,
                    Monitoring.Location.Status.Comment = NA_character_,
+                   Snap.Lat = NA_real_,
+                   Snap.Long = NA_real_,
                    stringsAsFactors = FALSE)
 
   return(df)
