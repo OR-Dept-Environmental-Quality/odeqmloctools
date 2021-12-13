@@ -7,14 +7,15 @@
 get_nhd_df(.data, x, y, crs, search_dist = 100, service = "DEQ")
 }
 \arguments{
-\item{.data}{A data frame}
+\item{.data}{A data frame holding}
 
-\item{x}{The longitude in decimal degrees. Required. Accepts a vector.}
+\item{x}{The column name in .data holding the longitude in decimal degrees. Required}
 
-\item{y}{The latitude in decimal degrees. Required. Accepts a vector.}
+\item{y}{The column name in .data holding the latitude in decimal degrees. Required.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The column name in .data holding the coordinate reference system for x and y.
+Same format as [sf::st_crs].
+Typically entered using the numeric EPSG value.}
 
 \item{search_dist}{The maximum search distance around x and y to look for features.
 Measured in meters. Default is 100.}
@@ -27,7 +28,7 @@ sf object with data frame columns for Permanent_Identifier, ReachCode, measure, 
 }
 \description{
 The function will query the NHD High REST service from Oregon DEQ or USGS and return a
-dataframe containing the NHD flowline info. The supplied x and y coordinates
+data frame containing the NHD flowline info. The supplied x and y coordinates
 (longitude and latitude) are used to select the closest NHD flowline record. Only the closest
 flowline within the search distance is returned. If there are no flowlines
 within the search distance the returned dataframe will contain all NAs. If two or more flowline

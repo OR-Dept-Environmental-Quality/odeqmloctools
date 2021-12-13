@@ -1,7 +1,7 @@
 #' Get NHD High info as a dataframe
 #'
 #' The function will query the NHD High REST service from Oregon DEQ or USGS and return a
-#' dataframe containing the NHD flowline info. The supplied x and y coordinates
+#' data frame containing the NHD flowline info. The supplied x and y coordinates
 #' (longitude and latitude) are used to select the closest NHD flowline record. Only the closest
 #' flowline within the search distance is returned. If there are no flowlines
 #' within the search distance the returned dataframe will contain all NAs. If two or more flowline
@@ -13,11 +13,12 @@
 #' USGS's national map REST service is the most recent version of NHD high and
 #' located at https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4.
 #'
-#' @param .data A data frame
-#' @param x The longitude in decimal degrees. Required. Accepts a vector.
-#' @param y The latitude in decimal degrees. Required. Accepts a vector.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'     Typically entered using the numeric EPSG value. Accepts a vector.
+#' @param .data A data frame holding
+#' @param x The column name in .data holding the longitude in decimal degrees. Required
+#' @param y The column name in .data holding the latitude in decimal degrees. Required.
+#' @param crs The column name in .data holding the coordinate reference system for x and y.
+#'     Same format as [sf::st_crs].
+#'     Typically entered using the numeric EPSG value.
 #' @param search_dist The maximum search distance around x and y to look for features.
 #'        Measured in meters. Default is 100.
 #' @param service The feature service to query. Options include "DEQ" or "USGS". Default is "DEQ".
@@ -50,7 +51,9 @@ get_nhd_df <- function(.data, x, y, crs, search_dist = 100, service = "DEQ"){
   # reset row numbers
   row.names(df) <- NULL
 
-  return(df)
+  df2 <- cbind(.data, df)
+
+  return(df2)
 
 }
 
