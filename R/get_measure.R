@@ -18,10 +18,10 @@
 #' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
 #'  Typically entered using the numeric EPSG value.
 #' @param return_sf Boolean. A TRUE value will return the sf object with data
-#'      frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
+#'      frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
 #'      FALSE will return the measure value as a character. Default is FALSE.
 #' @export
-#' @return sf object with data frame columns for Permanent_Identifier, ReachCode, measure, and snap_distance
+#' @return sf object with data frame columns for Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
 get_measure <- function(pid, x, y, crs, return_sf=FALSE){
 
   df <- purrr::pmap_dfr(list(pid, x, y, crs), return_sf = TRUE,
@@ -62,8 +62,10 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
                            GNIS_Name = NA_character_,
                            Permanent_Identifier = NA_character_,
                            ReachCode = NA_character_,
-                           Measure = NA_real_) %>%
-               dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, geometry) %>%
+                           Measure = NA_real_,
+                           Snap.Lat = NA_real_,
+                           Snap.Long - NA_real_) %>%
+               dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long, geometry) %>%
                sf::st_transform(crs = 4326))
     } else {
       return(NA_character_)
@@ -111,9 +113,9 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
   reach_points[1,c("length_seg")] <- 0
 
   # Snap distance in meters because of crs
-  reach_points$Snap_Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
+  reach_points$Snap.Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
 
-  if (units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
+  if (units::set_units(min(reach_points$Snap.Distance), m) > units::set_units(400, m))
     warning("Snap distance is > 400 meters. Is the x and y near the target Reach?")
 
   # Calculate measure, filter to the closest point and clean up
@@ -121,12 +123,12 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
                   Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
                   ) %>%
-    dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
+    dplyr::slice_min(Snap.Distance, with_ties = FALSE) %>%
     dplyr::left_join(reach_df) %>%
-    dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
-                  Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
+    dplyr::mutate(Snap.Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
+                  Snap.Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
     sf::st_zm() %>%
-    dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure)
+    dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long)
 
   if (return_sf) {
     return(df_meas)
@@ -142,13 +144,19 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 #'
 #' @param line The input NHD feature as an sf object with a geometry column.
 #' @param point The input point feature as an sf object with a geometry column
-#' @param id name of ID column in line
+#' @param id Column name in 'line' used to identify the polyline an calculate
+#'      measure distance along. Typically 'ReachCode' or 'REACHCODE'.
 #' @param return_df Boolean. A TRUE value will return the data
-#'      frame with columns for Measure, Snap_Lat, Snap_Long, and Snap_Distance.
+#'      frame with columns for Measure, Snap.Lat, Snap.Long, and Snap.Distance.
 #'      FALSE will return the measure value
 #'      as a character. Default is FALSE.
+#'@param nhdplus Boolean. Default is FALSE. A TRUE value will use the NHDplus fields
+#'      'TOMEAS' and 'FROMMEAS' in the measure calculation instead of the m value
+#'      from the feature geometry. NHDplus geometry returned
+#'      from USGS's REST service does not include a m value by default.
+#'
 #' @export
-get_measure2 <- function(line, point, id, return_df=FALSE){
+get_measure2 <- function(line, point, id, return_df=FALSE, nhdplus = FALSE){
 
   # feature service out crs, WGS84
   #fs_crs <- 4326
@@ -164,8 +172,15 @@ get_measure2 <- function(line, point, id, return_df=FALSE){
     sf::st_cast( to = "POINT") %>%
     dplyr::mutate(Measure = unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE))
 
-  meas_max <- max(reach$Measure)
-  meas_min <- min(reach$Measure)
+  if (nhdplus) {
+
+    meas_max <- max(reach$TOMEAS)
+    meas_min <- min(reach$FROMMEAS)
+
+  } else {
+    meas_max <- max(reach$Measure)
+    meas_min <- min(reach$Measure)
+  }
 
   rm(reach)
 
@@ -189,9 +204,9 @@ get_measure2 <- function(line, point, id, return_df=FALSE){
   reach_points[1,c("length_seg")] <- 0
 
   # Snap distance in meters because of crs
-  reach_points$Snap_Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
+  reach_points$Snap.Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
 
-  if (units::set_units(min(reach_points$Snap_Distance), m) > units::set_units(400, m))
+  if (units::set_units(min(reach_points$Snap.Distance), m) > units::set_units(400, m))
     warning("Snap distance is > 400 meters. Is the point near the line?")
 
   # Calculate measure, filter to the closest point and clean up
@@ -199,11 +214,11 @@ get_measure2 <- function(line, point, id, return_df=FALSE){
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
                   Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
                   ) %>%
-    dplyr::slice_min(Snap_Distance, with_ties = FALSE) %>%
-    dplyr::mutate(Snap_Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
-                  Snap_Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
+    dplyr::slice_min(Snap.Distance, with_ties = FALSE) %>%
+    dplyr::mutate(Snap.Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
+                  Snap.Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
     sf::st_drop_geometry() %>%
-    dplyr::select(Measure, Snap_Lat, Snap_Long, Snap_Distance)
+    dplyr::select(Measure, Snap.Lat, Snap.Long, Snap.Distance)
 
   if (return_df) {
     return(df_meas)

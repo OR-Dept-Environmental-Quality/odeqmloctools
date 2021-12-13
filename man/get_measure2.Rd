@@ -4,19 +4,25 @@
 \alias{get_measure2}
 \title{Get measure value along a line}
 \usage{
-get_measure2(line, point, id, return_df = FALSE)
+get_measure2(line, point, id, return_df = FALSE, nhdplus = FALSE)
 }
 \arguments{
 \item{line}{The input NHD feature as an sf object with a geometry column.}
 
 \item{point}{The input point feature as an sf object with a geometry column}
 
-\item{id}{name of ID column in line}
+\item{id}{Column name in 'line' used to identify the polyline an calculate
+measure distance along. Typically 'ReachCode' or 'REACHCODE'.}
 
 \item{return_df}{Boolean. A TRUE value will return the data
-frame with columns for Measure, Snap_Lat, Snap_Long, and Snap_Distance.
+frame with columns for Measure, Snap.Lat, Snap.Long, and Snap.Distance.
 FALSE will return the measure value
 as a character. Default is FALSE.}
+
+\item{nhdplus}{Boolean. Default is FALSE. A TRUE value will use the NHDplus fields
+'TOMEAS' and 'FROMMEAS' in the measure calculation instead of the m value
+from the feature geometry. NHDplus geometry returned
+from USGS's REST service does not include a m value by default.}
 }
 \description{
 Calculate the measure value given an input point and NHD line. The measure value is

@@ -17,11 +17,11 @@ get_measure(pid, x, y, crs, return_sf = FALSE)
 Typically entered using the numeric EPSG value.}
 
 \item{return_sf}{Boolean. A TRUE value will return the sf object with data
-frame columns for GNIS_Name, Permanent_Identifier, ReachCode, and Measure.
+frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
 FALSE will return the measure value as a character. Default is FALSE.}
 }
 \value{
-sf object with data frame columns for Permanent_Identifier, ReachCode, measure, and snap_distance
+sf object with data frame columns for Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
 }
 \description{
 The function will query Oregon DEQ's NHD REST service to determine the measure
