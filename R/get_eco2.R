@@ -64,7 +64,7 @@ get_eco2name <- function(x, y, crs) {
 }
 
 
-#' Non vectorized version of get_county. This is what purrr calls.
+#' Non vectorized version of get_eco2. This is what purrr calls.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
