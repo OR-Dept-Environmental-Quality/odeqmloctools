@@ -2,14 +2,14 @@
 % Please edit documentation in R/nhdplus_na.R.R
 \name{nhdplushr_na}
 \alias{nhdplushr_na}
-\title{NHDplus HR NA dataframe}
+\title{NHDplus HR NA data frame}
 \usage{
 nhdplushr_na()
 }
 \description{
-Return a dataframe with all the columns in the NHDplus HR REST service with NAs.
+Return a data frame with all the columns in the NHDplus HR REST service with NAs.
 Columns 'OBJECTID', 'Shape', and 'Shape_Length' are not included.
-Columns 'Measure', 'Snap_Lat', 'Snap_Long', and 'Snap_Distance' are added for downstram binding.
+Columns 'Measure', 'Snap_Lat', 'Snap_Long', and 'Snap_Distance' are added for downstream binding.
 }
 \details{
 More info at at https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/2.

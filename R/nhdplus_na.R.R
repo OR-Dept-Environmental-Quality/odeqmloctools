@@ -1,8 +1,8 @@
-#' NHDplus HR NA dataframe
+#' NHDplus HR NA data frame
 #'
-#' Return a dataframe with all the columns in the NHDplus HR REST service with NAs.
+#' Return a data frame with all the columns in the NHDplus HR REST service with NAs.
 #' Columns 'OBJECTID', 'Shape', and 'Shape_Length' are not included.
-#' Columns 'Measure', 'Snap_Lat', 'Snap_Long', and 'Snap_Distance' are added for downstram binding.
+#' Columns 'Measure', 'Snap_Lat', 'Snap_Long', and 'Snap_Distance' are added for downstream binding.
 #'
 #' More info at at https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/2.
 #'
