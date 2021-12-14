@@ -1,7 +1,7 @@
 Package: odeqmloctools
 Type: Package
 Title: ODEQ Monitoring Location Tools
-Version: 0.1.0
+Version: 0.2.0
 Author: c(person(given = "Ryan",
            family = "Michie",
            role = c("aut", "cre"),
@@ -21,8 +21,10 @@ Imports:
     leaflet (>= 2.0.0),
     leaflet.esri (>= 1.0.0),
     lubridate (>= 1.7.0),
-    magrittr,
+    lwgeom (>= 0.2-8),
+    magrittr (>= 2.0.1),
     purrr (>= 0.3.4),
     sf (>= 0.9-6),
     shiny (>= 1.5.0),
+    smoothr (>= 0.2.2),
     tidyr (>= 1.0.0)
