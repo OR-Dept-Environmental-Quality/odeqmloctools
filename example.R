@@ -1,12 +1,14 @@
 library(dplyr)
 library(odeqmloctools)
+library(devtools)
 
-df.import <- odeqcdr::contin_import(file = "/Users/rmichie/GitHub/odeqmloctools/test/mloc_example.xlsx",
-                                    sheets = c("Monitoring_Locations"))[["Monitoring_Locations"]]
+devtools::install_github("DEQrmichie/odeqmloctools", host = "https://api.github.com",
+                         dependencies = TRUE, force = TRUE, upgrade = "never")
+
 
 # For this example pretend to only start with certain columns. Add CRS column.
-df.mloc <- df.import[complete.cases(df.import[,c("Latitude", "Longitude")]),]  %>%
-  select(Monitoring.Location.ID, Monitoring.Location.Name, Longitude, Latitude, Horizontal.Datum) %>%
+df.mloc <- odeqmloctools::mloc_example() %>%
+  dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name, Longitude, Latitude, Horizontal.Datum) %>%
   dplyr::mutate(CRS = dplyr::case_when(Horizontal.Datum == "WGS84" ~ 4326,
                                        Horizontal.Datum == "NAD83" ~ 4269,
                                        TRUE ~ 4269))
@@ -23,8 +25,10 @@ df.mloc3 <- df.mloc2 %>%
          HUC12 = get_huc12code(x = Longitude, y = Latitude, crs = CRS),
          HUC8_Name = get_huc8name(x = Longitude, y = Latitude, crs = CRS),
          HUC10_Name = get_huc10name(x = Longitude, y = Latitude, crs = CRS),
-         HUC12_Name = get_huc12name(x = Longitude, y = Latitude, crs = CRS)
-  )
+         HUC12_Name = get_huc12name(x = Longitude, y = Latitude, crs = CRS),
+         EcoRegion2 = get_eco2name(x = Longitude, y = Latitude, crs = CRS),
+         EcoRegion3 = get_eco3code(x = Longitude, y = Latitude, crs = CRS),
+         EcoRegion4 = get_eco4code(x = Longitude, y = Latitude, crs = CRS))
 
 #-- More examples ---
 
