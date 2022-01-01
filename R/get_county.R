@@ -4,12 +4,13 @@
 #' TIGERweb feature service to determine the county name. The x and y
 #' coordinates (longitude and latitude) are used to select a specific county.
 #'
-#' The feature service can be accessed at https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/13
+#' The feature service can be accessed at \url{https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/13}
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#' Typically entered using the numeric EPSG value. Accepts a vector.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'        \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using the
+#'        numeric EPSG value. Accepts a vector.
 #' @export
 #' @return string of county basename
 get_county <- function(x, y, crs) {
@@ -23,6 +24,9 @@ get_county <- function(x, y, crs) {
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'        \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using the
+#'        numeric EPSG value.
 #' @noRd
 #' @return string of county basename
 get_county_ <- function(x, y, crs){

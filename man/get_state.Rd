@@ -11,8 +11,9 @@ get_state(x, y, crs)
 
 \item{y}{The latitude in decimal degrees.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+the numeric EPSG value. Accepts a vector.}
 }
 \value{
 state code
@@ -23,5 +24,5 @@ TIGERweb feature service to determine the state abbreviation. The x and y
 coordinates (longitude and latitude) are used to determine the state.
 }
 \details{
-The feature service can be accessed at https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/14
+The feature service can be accessed at \url{https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/14}.
 }

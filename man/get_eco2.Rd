@@ -11,8 +11,9 @@ get_eco2(x, y, crs)
 
 \item{y}{The latitude in decimal degrees.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using the
+numeric EPSG value. Accepts a vector.}
 }
 \value{
 data frame from feature service
@@ -24,8 +25,8 @@ the Ecoregion Level II. The x and y coordinates (longitude and latitude)
 are used to select a specific ecoregion.
 }
 \details{
-The feature service can be accessed at https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11
+The feature service can be accessed at \url{https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11}.
 }
 \seealso{
-[get_eco2code()] and [get_eco2name()]
+\code{\link{get_eco2code}}, \code{\link{get_eco2name}}
 }

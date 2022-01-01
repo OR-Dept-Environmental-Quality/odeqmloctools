@@ -11,8 +11,9 @@ get_huc10(x, y, crs)
 
 \item{y}{The latitude in decimal degrees.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+the numeric EPSG value. Accepts a vector.}
 }
 \value{
 sf object or data frame columns for HUC10 and HUC10_Name
@@ -22,9 +23,9 @@ The function will query Oregon DEQ's WBD feature service to determine the HUC10 
 used to select a specific HUC10 from the feature service. The WBD version is included with NHDH_OR_931v220.
 }
 \details{
-The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2.
+The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2}.
 The feature service column Name is changed to HUC10_Name.
 }
 \seealso{
-[get_huc10code()] and [get_huc10name()]
+\code{\link{get_huc10code}}, \code{\link{get_huc10name}}
 }

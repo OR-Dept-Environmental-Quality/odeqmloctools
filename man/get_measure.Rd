@@ -13,15 +13,18 @@ get_measure(pid, x, y, crs, return_sf = FALSE)
 
 \item{y}{The latitude in decimal degrees. Required.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+the numeric EPSG value. Accepts a vector.}
 
 \item{return_sf}{Boolean. A TRUE value will return the sf object with data
-frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
+frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure,
+Snap.Lat, and Snap.Long.
 FALSE will return the measure value as a character. Default is FALSE.}
 }
 \value{
-sf object with data frame columns for Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
+sf object with data frame columns for Permanent_Identifier, ReachCode,
+        Measure, Snap.Lat, and Snap.Long.
 }
 \description{
 The function will query Oregon DEQ's NHD REST service to determine the measure
@@ -29,11 +32,12 @@ value along a target NHD flowline. The Permanent Identifier (pid) is used to
 select a specific reach from the REST service. The x and y coordinates are snapped
 to the nearest vertex on the selected flowline and the measure value determined.
 If return_sf=TRUE the sf object is projected into ESPG:4326 (WGS84) which is
-the expected default for [leaflet].
+the expected default for \code{\link[leaflet]{leaflet}}.
 }
 \details{
-This function is intended to be a helper function for [launch_map] although it
-may be used independently as well. Compatible with piping.
+This function is intended to be a helper function for
+\code{\link{launch_map}} although it may be used independently as well.
+Compatible with piping.
 
-The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1
+The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1}.
 }

@@ -11,20 +11,23 @@ get_huc8(x, y, crs)
 
 \item{y}{The latitude in decimal degrees.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+the numeric EPSG value. Accepts a vector.}
 }
 \value{
 data frame columns for HUC8 and HUC8_Name
 }
 \description{
-The function will query Oregon DEQ's WBD feature service to determine the HUC8 subbasin code and name. The x and y coordinates (longitude and latitude) are
-used to select a specific HUC8 from the feature service. The WBD version is included with NHDH_OR_931v220.
+The function will query Oregon DEQ's WBD feature service to determine the HUC8
+subbasin code and name. The x and y coordinates (longitude and latitude) are
+used to select a specific HUC8 from the feature service. The WBD version is
+included with NHDH_OR_931v220.
 }
 \details{
-The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1
+The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/1}.
 The feature service column Name is changed to HUC8_Name.
 }
 \seealso{
-[get_huc8code()] and [get_huc8name()]
+\code{\link{get_huc8code}}, \code{\link{get_huc8name}}
 }

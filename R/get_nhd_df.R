@@ -1,24 +1,25 @@
 #' Get NHD High info as a dataframe
 #'
-#' The function will query the NHD High REST service from Oregon DEQ or USGS and return a
-#' data frame containing the NHD flowline info. The supplied x and y coordinates
-#' (longitude and latitude) are used to select the closest NHD flowline record. Only the closest
-#' flowline within the search distance is returned. If there are no flowlines
-#' within the search distance the returned dataframe will contain all NAs. If two or more flowline
-#' records are equal distance to x and y only the first record will be returned.
+#' The function will query the NHD High REST service from Oregon DEQ or USGS and
+#' return a data frame containing the NHD flowline info. The supplied x and y
+#' coordinates (longitude and latitude) are used to select the closest NHD
+#' flowline record. Only the closest flowline within the search distance is
+#' returned. If there are no flowlines within the search distance the returned
+#' dataframe will contain all NAs. If two or more flowline records are equal
+#' distance to x and y only the first record will be returned.
 #'
 #' Two REST feature services can be accessed. DEQ and USGS. Use the 'service'
 #' argument to specific which service to use. DEQ's REST service is based
-#' on NHDH_OR_931v220 at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1.
+#' on NHDH_OR_931v220 at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1}.
 #' USGS's national map REST service is the most recent version of NHD high and
-#' located at https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4.
+#' located at \url{https://hydro.nationalmap.gov/arcgis/rest/services/nhd/MapServer/4}.
 #'
 #' @param .data A data frame holding
 #' @param x The column name in .data holding the longitude in decimal degrees. Required
 #' @param y The column name in .data holding the latitude in decimal degrees. Required.
-#' @param crs The column name in .data holding the coordinate reference system for x and y.
-#'     Same format as [sf::st_crs].
-#'     Typically entered using the numeric EPSG value.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
 #' @param search_dist The maximum search distance around x and y to look for features.
 #'        Measured in meters. Default is 100.
 #' @param service The feature service to query. Options include "DEQ" or "USGS". Default is "DEQ".

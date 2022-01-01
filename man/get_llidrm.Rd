@@ -13,23 +13,34 @@ get_llidrm(llid, x, y, max_length = 82, return_sf = FALSE)
 
 \item{y}{The latitude in decimal degrees}
 
-\item{max_length}{The maximum segment length in feet to split the LLID segment into. Default is 82 feet (25 meters). Passed to [odeqcdr::split_lines]. The smaller the distance the longer the operation takes.}
+\item{max_length}{The maximum segment length in feet to split the LLID segment
+into. Default is 82 feet (25 meters). Passed to
+\code{\link{odeqcdr::split_lines}}.
+The smaller the distance the longer the operation takes.}
 
-\item{return_sf}{Boolean. Default is FALSE. A TRUE value will return a sf point object of the
-snapped location with data frame columns for Stream 'NAME', 'LLID', 'River_Mile', and 'RM_Total' for the total LLID river miles.}
+\item{return_sf}{Boolean. Default is FALSE. A TRUE value will return a sf
+point object of the snapped location with data frame columns for
+Stream 'NAME', 'LLID', 'River_Mile', and 'RM_Total' for the total
+LLID river miles.}
 }
 \value{
 river mile info
 }
 \description{
-The function will query Oregon DEQ's LLID streams feature service to determine the river mile value along the target LLID polyline given a nearby latitude and longitude. The LLID value is
-used to select a specific reach from the feature service. The LLID is split into 150 foot segments with a vertex on either end of the segment.
-The x and y coordinates are snapped to the nearest vertex. The river mile is calculated based on the distance from downstream end of the LLID.
-The feature data is projected into ESPG:2994 (Oregon Lambert NAD83 HARN) for all operations. Units are feet. If return_sf=TRUE the sf is projected into ESPG:4326 (WGS84)
-which is the expected default for [leaflet].
+The function will query Oregon DEQ's LLID streams feature service to determine
+the river mile value along the target LLID polyline given a nearby latitude and
+longitude. The LLID value is used to select a specific reach from the feature
+service. The LLID is split into 150 foot segments with a vertex on either end
+of the segment. The x and y coordinates are snapped to the nearest vertex.
+The river mile is calculated based on the distance from downstream end of the
+LLID. The feature data is projected into ESPG:2994 (Oregon Lambert NAD83 HARN)
+for all operations. Units are feet. If return_sf=TRUE the sf is projected
+into ESPG:4326 (WGS84) which is the expected default for
+\code{\link[leaflet]{leaflet}}.
 }
 \details{
-This function is intended to be a helper function for [odeqcdr::launch_map] although it may be used independently as well.
+This function is intended to be a helper function for \code{\link{launch_map}}
+although it may be used independently as well.
 
-The LLID feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0/
+The LLID feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0/}.
 }

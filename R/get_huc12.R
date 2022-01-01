@@ -3,14 +3,15 @@
 #' The function will query Oregon DEQ's WBD feature service to determine the HUC12 subwatershed code and name. The x and y coordinates (longitude and latitude) are
 #' used to select a specific HUC12 from the feature service. The WBD version is included with NHDH_OR_931v220.
 #'
-#' The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3.
+#' The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3}.
 #' The feature service column Name is changed to HUC12_Name.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_huc12code()] and [get_huc12name()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_huc12code}}, \code{\link{get_huc12name}}
 #' @export
 #' @return data frame columns for HUC12 and HUC12_Name
 get_huc12 <- function(x, y, crs) {
@@ -25,11 +26,14 @@ get_huc12 <- function(x, y, crs) {
 #' HUC12 subwatershed code. The x and y coordinates (longitude and latitude) are
 #' used to select a specific HUC12 from the feature service.
 #'
+#' The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3}.
+#'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_huc12()], [get_huc12name()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_huc12}}, \code{\link{get_huc12name}}
 #' @export
 #' @return The HUC12 code as character format
 get_huc12code <- function(x, y, crs) {
@@ -44,11 +48,14 @@ get_huc12code <- function(x, y, crs) {
 #' the HUC12 subwatershed name. The x and y coordinates (longitude and latitude) are
 #' used to select a specific HUC12 from the feature service.
 #'
+#' The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/3}.
+#'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_huc12()], [get_huc12code()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_huc12}}, \code{\link{get_huc12code}}
 #' @export
 #' @return The HUC12 name
 get_huc12name <- function(x, y, crs) {
@@ -61,6 +68,9 @@ get_huc12name <- function(x, y, crs) {
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value.
 #' @noRd
 #' @return data frame columns for HUC12 and HUC12_Name
 get_huc12_ <- function(x, y, crs){

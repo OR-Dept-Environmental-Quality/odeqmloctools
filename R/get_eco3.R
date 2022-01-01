@@ -5,13 +5,14 @@
 #' the Ecoregion Level III. The x and y coordinates (longitude and latitude)
 #' are used to select a specific ecoregion.
 #'
-#' The feature service can be accessed at https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11
+#' The feature service can be accessed at \url{https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11}.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#' Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_eco3code()] and [get_eco3name()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_eco3code}}, \code{\link{get_eco3name}}
 #' @export
 #' @return data frame from feature service
 get_eco3 <- function(x, y, crs) {
@@ -27,13 +28,14 @@ get_eco3 <- function(x, y, crs) {
 #' the Ecoregion Level III code. The x and y coordinates (longitude and latitude)
 #' are used to select a specific ecoregion.
 #'
-#' The feature service can be accessed at https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11
+#' The feature service can be accessed at \url{https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11}.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_eco3()], [get_eco3name()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_eco3}}, \code{\link{get_eco3name}}
 #' @export
 #' @return Ecoregion Level III code in character format
 get_eco3code <- function(x, y, crs) {
@@ -49,13 +51,14 @@ get_eco3code <- function(x, y, crs) {
 #' the Ecoregion Level III name. The x and y coordinates (longitude and latitude)
 #' are used to select a specific ecoregion.
 #'
-#' The feature service can be accessed at https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11
+#' The feature service can be accessed at \url{https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/11}.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
-#' @seealso [get_eco3()], [get_eco3code()]
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
+#' @seealso \code{\link{get_eco3}}, \code{\link{get_eco3code}}
 #' @export
 #' @return The Ecoregion Level III name
 get_eco3name <- function(x, y, crs) {
@@ -68,6 +71,9 @@ get_eco3name <- function(x, y, crs) {
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value.
 #' @noRd
 #' @return data frame from feature service
 get_eco3_ <- function(x, y, crs){

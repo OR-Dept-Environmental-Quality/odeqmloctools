@@ -4,12 +4,13 @@
 #' TIGERweb feature service to determine the state abbreviation. The x and y
 #' coordinates (longitude and latitude) are used to determine the state.
 #'
-#' The feature service can be accessed at https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/14
+#' The feature service can be accessed at \url{https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/14}.
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
 #' @export
 #' @return state code
 get_state <- function(x, y, crs){
@@ -22,8 +23,9 @@ get_state <- function(x, y, crs){
 #'
 #' @param x The longitude in decimal degrees.
 #' @param y The latitude in decimal degrees.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value. Accepts a vector.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value.
 #' @noRd
 #' @return state code
 get_state_ <- function(x, y, crs){

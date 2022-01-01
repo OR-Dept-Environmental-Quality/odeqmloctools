@@ -24,8 +24,8 @@ the Ecoregion Level IV code. The x and y coordinates (longitude and latitude)
 are used to select a specific ecoregion.
 }
 \details{
-The feature service can be accessed at https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/7
+The feature service can be accessed at \url{https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/7}.
 }
 \seealso{
-[get_eco4()], [get_eco4name()]
+\code{\link{get_eco4}}, \code{\link{get_eco4name}}
 }

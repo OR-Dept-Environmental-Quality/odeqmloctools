@@ -11,8 +11,9 @@ get_huc10code(x, y, crs)
 
 \item{y}{The latitude in decimal degrees.}
 
-\item{crs}{The coordinate reference system for x and y. Same format as [sf::st_crs].
-Typically entered using the numeric EPSG value. Accepts a vector.}
+\item{crs}{The coordinate reference system for x and y. Same format as
+\code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+the numeric EPSG value. Accepts a vector.}
 }
 \value{
 The HUC10 code as character format
@@ -22,6 +23,9 @@ The function will query Oregon DEQ's WBD feature service to determine the
 HUC10 watershed code. The x and y coordinates (longitude and latitude) are
 used to select a specific HUC10 from the feature service.
 }
+\details{
+The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2}.
+}
 \seealso{
-[get_huc10()], [get_huc10name()]
+\code{\link{get_huc10}}, \code{\link{get_huc10name}}
 }

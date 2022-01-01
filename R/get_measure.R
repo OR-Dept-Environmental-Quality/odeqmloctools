@@ -5,23 +5,27 @@
 #' select a specific reach from the REST service. The x and y coordinates are snapped
 #' to the nearest vertex on the selected flowline and the measure value determined.
 #' If return_sf=TRUE the sf object is projected into ESPG:4326 (WGS84) which is
-#' the expected default for [leaflet].
+#' the expected default for \code{\link[leaflet]{leaflet}}.
 #'
-#' This function is intended to be a helper function for [launch_map] although it
-#' may be used independently as well. Compatible with piping.
+#' This function is intended to be a helper function for
+#' \code{\link{launch_map}} although it may be used independently as well.
+#' Compatible with piping.
 #'
-#' The feature service can be accessed at https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1
+#' The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1}.
 #'
 #' @param pid The NHD Permanent_Identifier value as a string. Required.
 #' @param x The longitude in decimal degrees. Required.
 #' @param y The latitude in decimal degrees. Required.
-#' @param crs The coordinate reference system for x and y. Same format as [sf::st_crs].
-#'  Typically entered using the numeric EPSG value.
+#' @param crs The coordinate reference system for x and y. Same format as
+#'            \code{\link[sf:st_crs]{sf::st_crs}}. Typically entered using
+#'            the numeric EPSG value. Accepts a vector.
 #' @param return_sf Boolean. A TRUE value will return the sf object with data
-#'      frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
+#'      frame columns for GNIS_Name, Permanent_Identifier, ReachCode, Measure,
+#'      Snap.Lat, and Snap.Long.
 #'      FALSE will return the measure value as a character. Default is FALSE.
 #' @export
-#' @return sf object with data frame columns for Permanent_Identifier, ReachCode, Measure, Snap.Lat, and Snap.Long.
+#' @return sf object with data frame columns for Permanent_Identifier, ReachCode,
+#'         Measure, Snap.Lat, and Snap.Long.
 get_measure <- function(pid, x, y, crs, return_sf=FALSE){
 
   df <- purrr::pmap_dfr(list(pid, x, y, crs), return_sf = TRUE,
@@ -30,7 +34,7 @@ get_measure <- function(pid, x, y, crs, return_sf=FALSE){
 }
 
 #' Work horse function. Non vectorized. Retrieves geometry from REST service
-#' using PID. This is primarily for use with [launch_map]
+#' using PID. This is primarily for use with \code{\link{launch_map}}.
 #'
 #' @noRd
 get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
