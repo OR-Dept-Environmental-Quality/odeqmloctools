@@ -21,7 +21,7 @@
 #' @param y The latitude in decimal degrees
 #' @param max_length The maximum segment length in feet to split the LLID segment
 #'        into. Default is 82 feet (25 meters). Passed to
-#'        \code{\link{odeqcdr::split_lines}}.
+#'        \code{\link{split_lines}}.
 #'        The smaller the distance the longer the operation takes.
 #' @param return_sf Boolean. Default is FALSE. A TRUE value will return a sf
 #'        point object of the snapped location with data frame columns for
@@ -97,7 +97,7 @@ get_llidrm <- function(llid, x, y, max_length=82, return_sf=FALSE){
     dplyr::group_by(LLID) %>%
     summarise(do_union = FALSE) %>%
     sf::st_cast(to = "LINESTRING") %>%
-    odeqcdr::split_lines(max_length = max_length, id = "LLID")
+    split_lines(max_length = max_length, id = "LLID")
 
   reach1$length_seg <- units::set_units(sf::st_length(reach1), mi)
 

@@ -15,7 +15,7 @@ get_llidrm(llid, x, y, max_length = 82, return_sf = FALSE)
 
 \item{max_length}{The maximum segment length in feet to split the LLID segment
 into. Default is 82 feet (25 meters). Passed to
-\code{\link{odeqcdr::split_lines}}.
+\code{\link{split_lines}}.
 The smaller the distance the longer the operation takes.}
 
 \item{return_sf}{Boolean. Default is FALSE. A TRUE value will return a sf
