@@ -7,15 +7,31 @@
 #'    can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
 #'    or as a data frame using \code{\link{df_mloc}}. 'Snap.Lat' and 'Snap.Long'
 #'    are added.
-#' @param px_ht Height of the map in pixels. Default is 470 which fits on most standard laptop screens. The minimum height is 300 pixels.
+#' @param px_ht Height of the map in pixels. Default is 470 which fits on most
+#'              standard laptop screens. The minimum height is 300 pixels.
+#' @param hide_layers vector of the map layer names that remain hidden by default.
+#'                  They can still be turned on manually in the map view.
+#'           The default is set to c("LLID Streams", "Hydrography")). To show all
+#'           layers use hide_layers = NULL.
+#'           Options include any of the following: "Review Stations", "AWQMS Stations",
+#'           "NHD Streams", "LLID Streams", "Hydrography", and "Oregon Imagery".
 #' @export
 #' @return Launches a leaflet map within a Shiny app. Returns mloc data frame with any saved changes on app close.
 
-launch_map <- function(mloc, px_ht=470){
+launch_map <- function(mloc, px_ht = 470,
+                       hide_layers = c("LLID Streams", "Hydrography")){
 
   if (!is.numeric(px_ht)) {stop("px_ht is not a numeric value.")}
 
   if ((px_ht < 300 )) {stop("px_ht must be greater than 300.")}
+
+  valid_groups <- c("Review Stations", "AWQMS Stations", "NHD Streams",
+                    "LLID Streams", "Hydrography", "Oregon Imagery")
+
+  if (any(!hide_layers %in% valid_groups)) {
+    stop(paste0("The following value/s for hide_layers is not valid: ",
+                hide_layers[!hide_layers %in% valid_groups]))
+  }
 
   px_ht <- paste0(px_ht,"px")
 
@@ -275,7 +291,7 @@ launch_map <- function(mloc, px_ht=470){
           primaryAreaUnit = "sqmeters",
           activeColor = "#3D535D",
           completedColor = "#7D4479") %>%
-          leaflet::hideGroup(c("LLID Streams","Hydrography"))
+          leaflet::hideGroup(hide_layers)
 
         map
 
