@@ -7,7 +7,7 @@ devtools::install_github("DEQrmichie/odeqmloctools", host = "https://api.github.
 
 
 # For this example pretend to only start with certain columns. Add CRS column.
-df.mloc <- odeqmloctools::mloc_example() %>%
+df.mloc <- odeqmloctools::mloc_example %>%
   dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name, Longitude, Latitude, Horizontal.Datum) %>%
   dplyr::mutate(CRS = dplyr::case_when(Horizontal.Datum == "WGS84" ~ 4326,
                                        Horizontal.Datum == "NAD83" ~ 4269,
