@@ -5,7 +5,7 @@
 \alias{ornhd}
 \title{Oregon DEQ NHD}
 \format{
-An object of class \code{data.frame} with 1816842 rows and 14 columns.
+An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1544909 rows and 23 columns.
 }
 \usage{
 data(ornhd)
@@ -13,6 +13,7 @@ data(ornhd)
 \description{
 Table of National Hydrography Dataset (NHD) in Oregon. The table corresponds
 to NHDH_OR_931v220, which is the current version used for DEQ business data.
+Also includes Oregon's Assessment Unit fields as of 03-30-2022.
 }
 \details{
 \itemize{
@@ -35,6 +36,15 @@ to NHDH_OR_931v220, which is the current version used for DEQ business data.
         combinations of characteristics and values.
   \item MainPath:
   \item InNetwork:
+  \item AU_ID: Oregon assessment unit ID
+  \item AU_Name: Name of the assessment unit
+  \item AU_Description: Assessment unit descriptions
+  \item AU_WBType: Assessment unit waterbody type code
+  \item AU_UseCode: Assessment unit use code
+  \item AU_GNIS_Name: Assessment unit and GNIS name concatenation.
+  \item AU_GNIS: Same as GNIS name but with a few additional names not in NHD
+  \item AU_LenMile: Assessment unit length in miles
+  \item AU_AreaAcr: Assessment unit areas in acres if a waterbody (e.g. lake)
   \item StreamOrder: Strahler stream order number for the reach.
 }
 }
