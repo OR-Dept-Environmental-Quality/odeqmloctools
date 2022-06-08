@@ -1,7 +1,9 @@
 #' Get HUC10 info
 #'
-#' The function will query Oregon DEQ's WBD feature service to determine the HUC10 watershed code and name. The x and y coordinates (longitude and latitude) are
-#' used to select a specific HUC10 from the feature service. The WBD version is included with NHDH_OR_931v220.
+#' The function will query Oregon DEQ's WBD feature service to determine the HUC10
+#' watershed code and name. The x and y coordinates (longitude and latitude) are
+#' used to select a specific HUC10 from the feature service. The WBD version is
+#' included with NHDH_OR_931v220.
 #'
 #' The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2}.
 #' The feature service column Name is changed to HUC10_Name.
@@ -16,7 +18,7 @@
 #' @return sf object or data frame columns for HUC10 and HUC10_Name
 #'
 get_huc10 <- function(x, y, crs){
-  df <- purrr::pmap(list(x, y, crs), .f = get_huc10_)
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_huc10_)
   return(df)
 }
 

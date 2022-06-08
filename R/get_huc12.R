@@ -15,7 +15,7 @@
 #' @export
 #' @return data frame columns for HUC12 and HUC12_Name
 get_huc12 <- function(x, y, crs) {
-  df <- purrr::pmap(list(x, y, crs), .f = get_huc12_)
+  df <- purrr::pmap_dfr(list(x, y, crs), .f = get_huc12_)
   return(df)
 }
 
