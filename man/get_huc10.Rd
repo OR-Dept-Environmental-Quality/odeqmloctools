@@ -19,8 +19,10 @@ the numeric EPSG value. Accepts a vector.}
 sf object or data frame columns for HUC10 and HUC10_Name
 }
 \description{
-The function will query Oregon DEQ's WBD feature service to determine the HUC10 watershed code and name. The x and y coordinates (longitude and latitude) are
-used to select a specific HUC10 from the feature service. The WBD version is included with NHDH_OR_931v220.
+The function will query Oregon DEQ's WBD feature service to determine the HUC10
+watershed code and name. The x and y coordinates (longitude and latitude) are
+used to select a specific HUC10 from the feature service. The WBD version is
+included with NHDH_OR_931v220.
 }
 \details{
 The feature service can be accessed at \url{https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2}.
