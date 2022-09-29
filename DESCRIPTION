@@ -2,10 +2,10 @@ Package: odeqmloctools
 Type: Package
 Title: ODEQ Monitoring Location Tools
 Version: 0.2.5
-Author: c(person(given = "Ryan",
+Authors@R: c(person(given = "Ryan",
            family = "Michie",
            role = c("aut", "cre"),
-           email = "Ryan.Michie@deq.oregon.gov"),
+           email = "Ryan.Michie@deq.oregon.gov"))
 Maintainer: Ryan Michie <Ryan.Michie@deq.oregon.gov>
 Description: This package provides QA/QC support for review and editing 
              of monitoring location (mloc) information.
@@ -18,7 +18,7 @@ Imports:
     geojsonsf (>= 2.0.0),
     httr (>= 1.4.0),
     leafem (>= 0.1.1),
-    leaflet (>= 2.0.0),
+    leaflet (>= 2.1.1),
     leaflet.esri (>= 1.0.0),
     lubridate (>= 1.7.0),
     lwgeom (>= 0.2-8),
