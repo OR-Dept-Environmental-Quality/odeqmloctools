@@ -32,7 +32,7 @@ get_county <- function(x, y, crs) {
 get_county_ <- function(x, y, crs){
 
   # Test data
-  # y=42.09361
+  # y= 42.09361
   # x=-122.3822
   # crs=4326
 
@@ -58,6 +58,10 @@ get_county_ <- function(x, y, crs){
     warning("Error, NA returned")
     return(NA_character_)
   }
+
+  # change dates to character. Sometimes returned from rest service as numeric
+  df$ESTABDATE <- as.character(df$ESTABDATE)
+  df$EFFDATE <- as.character(df$EFFDATE)
 
   return(df)
 }

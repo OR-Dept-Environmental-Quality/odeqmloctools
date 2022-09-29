@@ -70,6 +70,10 @@ get_nhd_ <- function(x, y, crs, search_dist = 100) {
   # crs = 4326
   # search_dist = 100
 
+  # y = 44.0455
+  # x = -123.028
+  # crs = 4269
+
   # Idaho (error)
   # y = 44.24176
   # x = -116.9416
@@ -129,7 +133,8 @@ get_nhd_ <- function(x, y, crs, search_dist = 100) {
                   WBArea_Permanent_Identifier, FType, FCode, MainPath, InNetwork,
                   geometry)
 
-  df_meas <- get_measure2(line = reach_df2, point = site, return_df = TRUE)
+  df_meas <- get_measure2(line = reach_df2, point = site, id = "ReachCode",
+                          return_df = TRUE)
   reach_df3 <- cbind(reach_df2, df_meas)
 
   return(reach_df3)
@@ -205,7 +210,7 @@ get_nhd_usgs <- function(x, y, crs, search_dist = 100) {
     dplyr::select(GNIS_ID,
                   GNIS_Name = GNIS_NAME,
                   Permanent_Identifier = PERMANENT_IDENTIFIER,
-                  ReachCode = REACHCODE,
+                  ReachCode = dplyr::matches("REACHCODE", ignore.case = TRUE),
                   WBArea_Permanent_Identifier = WBAREA_PERMANENT_IDENTIFIER,
                   FType = FTYPE,
                   FCode = FCODE,
