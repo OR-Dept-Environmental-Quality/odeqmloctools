@@ -2,13 +2,15 @@ library(dplyr)
 library(odeqmloctools)
 library(devtools)
 
-devtools::install_github("DEQrmichie/odeqmloctools", host = "https://api.github.com",
+devtools::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
+                         host = "https://api.github.com",
                          dependencies = TRUE, force = TRUE, upgrade = "never")
 
 
 # For this example pretend to only start with certain columns. Add CRS column.
 df.mloc <- odeqmloctools::mloc_example %>%
-  dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name, Longitude, Latitude, Horizontal.Datum) %>%
+  dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name,
+                Longitude, Latitude, Horizontal.Datum) %>%
   dplyr::mutate(CRS = dplyr::case_when(Horizontal.Datum == "WGS84" ~ 4326,
                                        Horizontal.Datum == "NAD83" ~ 4269,
                                        TRUE ~ 4269))
@@ -30,12 +32,26 @@ df.mloc3 <- df.mloc2 %>%
          EcoRegion3 = get_eco3code(x = Longitude, y = Latitude, crs = CRS),
          EcoRegion4 = get_eco4code(x = Longitude, y = Latitude, crs = CRS))
 
+
+# Get AU_ID info. Must already have the Permanent Identifier.
+df.mloc4 <- odeqmloctools::mloc_example %>%
+  dplyr::left_join(odeqmloctools::ornhd,
+                   by = c("Permanent.Identifier" = "Permanent_Identifier")) %>%
+  dplyr::filter(!AU_ID == "99")
+
 #-- More examples ---
 
-# Get a data frame of most current NHD High from USGS. Includes measure value based on snapping x/y.
-df.nhd_usgs <- df.mloc3 %>%
-  get_nhd_df(x = Longitude, y = Latitude, crs = CRS, search_dist = 100, service = "USGS")
+# Get a data frame of most current NHD High from USGS.
+# Includes measure value based on snapping x/y.
+df.nhd_usgs <- df.mloc %>%
+  get_nhd_df(x = Longitude, y = Latitude, crs = CRS,
+             search_dist = 100, service = "USGS")
 
 # Get a data frame of NHD plus HR info
 df.nhdplus <- df.mloc3 %>%
   get_nhdplus_df(x = Longitude, y = Latitude, crs = CRS, search_dist = 100)
+
+
+df.nhd_usgs <- df.mloc3[7,] %>%
+  get_nhd_df(x = Longitude, y = Latitude, crs = CRS,
+             search_dist = 500, service = "USGS")
