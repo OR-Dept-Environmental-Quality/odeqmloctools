@@ -11,7 +11,7 @@ get_measure2(line, point, id, return_df = FALSE, nhdplus = FALSE)
 
 \item{point}{The input point feature as an sf object with a geometry column}
 
-\item{id}{Column name in 'line' used to identify the polyline an calculate
+\item{id}{Column name in 'line' used to identify the polyline and calculate
 measure distance along. Typically 'ReachCode' or 'REACHCODE'.}
 
 \item{return_df}{Boolean. A TRUE value will return the data

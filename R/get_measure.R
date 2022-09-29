@@ -148,7 +148,7 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 #'
 #' @param line The input NHD feature as an sf object with a geometry column.
 #' @param point The input point feature as an sf object with a geometry column
-#' @param id Column name in 'line' used to identify the polyline an calculate
+#' @param id Column name in 'line' used to identify the polyline and calculate
 #'      measure distance along. Typically 'ReachCode' or 'REACHCODE'.
 #' @param return_df Boolean. A TRUE value will return the data
 #'      frame with columns for Measure, Snap.Lat, Snap.Long, and Snap.Distance.
@@ -160,7 +160,7 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 #'      from USGS's REST service does not include a m value by default.
 #'
 #' @export
-get_measure2 <- function(line, point, id, return_df=FALSE, nhdplus = FALSE){
+get_measure2 <- function(line, point, id, return_df = FALSE, nhdplus = FALSE){
 
   # feature service out crs, WGS84
   #fs_crs <- 4326
