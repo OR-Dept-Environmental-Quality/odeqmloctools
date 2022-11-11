@@ -14,7 +14,7 @@ data(mloc_example)
 Data frame of Oregon DEQ ambient network monitoring locations
 }
 \examples{
-mlocs <- odeqmloctools::mloc_example()
+mlocs <- odeqmloctools::mloc_example
 
 }
 \keyword{datasets}
