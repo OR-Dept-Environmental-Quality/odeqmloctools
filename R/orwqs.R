@@ -1,0 +1,33 @@
+#' Oregon Beneficial Use and Water Quality Standard Codes
+#'
+#'Table of Oregon Beneficial Use and Water Quality Standard Codes as of 11-10-2022.
+#'The codes are referenced to National Hydrography Dataset (NHD) Permanent
+#'Identifiers. The NHD version corresponds to NHDH_OR_931v220, which is the
+#'current version used for DEQ business data.
+#'
+#'See Oregon DEQ Georeferencing Classification Codes for meaning of Beneficial
+#'Use and Water Quality Standard Codes.
+#'
+#' \itemize{
+#'   \item Permanent_Identifier: NHD Permanent Identifier
+#'   \item WBArea_Permanent_Identifier: NHD Waterbody feature Permanent Identifier
+#'   \item FishCode: Designated Aquatic Life Fish Use Subcategories (Temperature)
+#'   \item SpawnCode: Designated Seasonal Spawning Date Ranges (Temperature)
+#'   \item WaterTypeCode: Water Type - Salinity-based water type designation
+#'   \item WaterBodyCode: Water Body Type - Functional or morphologic water body type designation
+#'   \item BacteriaCode: Designated Contact Recreation and Shellfish Harvest Use Subcategories (Bacteria)
+#'   \item DO_code: Designated Aquatic Life Use Subcategories (Dissolved Oxygen).
+#'   \item ben_use_code: Beneficial Use Designations – Designated beneficial uses of the waterbody
+#'   \item pH_code: Designated pH standards (pH)
+#'   \item DO_SpawnCode: Designated Seasonal Spawning Date Ranges (Dissolved Oxygen)
+#'   \item TempCode: Temperature standard applied for Clean Water Act purposes.
+#' }
+#'
+#' @docType data
+#' @usage data(orwqs)
+#' @keywords datasets
+#' @md
+#' @examples
+#' wqs <- odeqmloctools::orwqs
+
+"orwqs"
