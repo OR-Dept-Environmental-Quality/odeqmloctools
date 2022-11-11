@@ -5,7 +5,7 @@
 #'Also includes Oregon's Assessment Unit fields as of 03-30-2022.
 #'
 #' \itemize{
-#'   \item Permanent_Identifier:
+#'   \item Permanent_Identifier: NHD Permanent Identifier
 #'   \item FDate: Date of last feature modification.
 #'   \item Resolution: Source resolution.
 #'   \item GNIS_ID: Unique identifier assigned by GNIS, length 10.
@@ -18,7 +18,7 @@
 #'         digits are randomly assigned, sequential numbers that are unique
 #'         within a subbasin, length 14.
 #'   \item FlowDir: Direction of flow relative to coordinate order, length 4.
-#'   \item WBArea_Permanent_Identifier:
+#'   \item WBArea_Permanent_Identifier: NHD Waterbody feature Permanent Identifier
 #'   \item FType: Three-digit integer value; unique identifier of a feature type.
 #'   \item FCode: Five-digit integer value; composed of the feature type and
 #'         combinations of characteristics and values.
@@ -39,6 +39,7 @@
 #' @docType data
 #' @usage data(ornhd)
 #' @keywords datasets
+#' @md
 #' @examples
 #' nhd <- odeqmloctools::ornhd
 #'
