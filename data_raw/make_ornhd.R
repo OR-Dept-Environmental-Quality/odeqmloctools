@@ -2,7 +2,7 @@ library(readr)
 library(dplyr)
 
 # read gis txt export
-ornhd.raw <- readr::read_csv("data_raw/ornhd_2022_03.txt")
+ornhd.raw <- readr::read_csv("data_raw/ornhd_2022_03_global_IDs.txt")
 
 # get the Strahler stream order from the older data frame
 # Once DEQ migrates to a new NHD version the StreamOrder field should be included
@@ -15,7 +15,7 @@ ornhd <- ornhd.raw %>%
                 LengthKM, ReachCode, FlowDir, WBArea_Permanent_Identifier,
                 FType, FCode, MainPath, InNetwork, AU_ID, AU_Name, AU_Description,
                 AU_WBType, AU_UseCode, AU_GNIS_Name, AU_GNIS,
-                AU_LenMile, AU_AreaAcr, StreamOrder)  %>%
+                AU_LenMile, AU_AreaAcr, StreamOrder, GLOBALID)  %>%
   distinct()
 
 save(ornhd, file = "data/ornhd.RData")

@@ -34,6 +34,7 @@
 #'   \item AU_LenMile: Assessment unit length in miles
 #'   \item AU_AreaAcr: Assessment unit areas in acres if a waterbody (e.g. lake)
 #'   \item StreamOrder: Strahler stream order number for the reach.
+#'   \item GLOBALID: Unique ID assigned to each row. Not from NHD.
 #' }
 #'
 #' @docType data
