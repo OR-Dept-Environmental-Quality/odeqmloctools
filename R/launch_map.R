@@ -5,8 +5,9 @@
 #'    'Latitude', and 'Longitude'. Other columns are optional but will be added
 #'    if not present and the values set to NA. The full set of mloc column names
 #'    can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
-#'    or as a data frame using \code{\link{df_mloc}}. 'Snap.Lat' and 'Snap.Long'
-#'    are added.
+#'    or as a data frame using \code{\link{df_mloc}}. "Snap.Lat" and "Snap.Long"
+#'    "HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
+#'    "AU_ID", "AU_Name", "AU_GNIS" are added.
 #' @param px_ht Height of the map in pixels. Default is 470 which fits on most
 #'              standard laptop screens. The minimum height is 300 pixels.
 #' @param hide_layers vector of the map layer names that remain hidden by default.
@@ -35,13 +36,16 @@ launch_map <- function(mloc, px_ht = 470,
 
   px_ht <- paste0(px_ht,"px")
 
-  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "Snap.Lat", "Snap.Long")) %in% names(mloc)]
+  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
+                                           "AU_ID", "AU_Name", "AU_GNIS_Name", "AU_GNIS", "Snap.Lat", "Snap.Long")) %in% names(mloc)]
 
   mloc <- cbind(mloc, missing_cols)
 
   df.mloc <-  mloc %>%
     dplyr::mutate(choices = paste(Monitoring.Location.ID, Monitoring.Location.Name, sep = " - "),
                   row = dplyr::row_number())
+
+  nhdinfo <- odeqmloctools::ornhd
 
   app <- shiny::shinyApp(
 
@@ -73,6 +77,13 @@ launch_map <- function(mloc, px_ht = 470,
                                                          shiny::column(width = 3, shiny::verbatimTextOutput("AWQMSprintout", placeholder = TRUE)),
                                                          shiny::column(width = 1, shiny::actionButton(inputId = "AWQMSsave", label = "Save Alt ID"), align = "left")),
 
+                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("HUC Info"), align = "right"),
+                                                         shiny::column(width = 4, shiny::verbatimTextOutput("HUCprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "HUCsave", label = "Save HUC Info", style = "margin-top: 0px;"), align = "left"),
+                                                         shiny::column(width = 1, shiny::h6("AU ID"), align = "right"),
+                                                         shiny::column(width = 3, shiny::verbatimTextOutput("AUprintout", placeholder = TRUE)),
+                                                         shiny::column(width = 1, shiny::actionButton(inputId = "AUsave", label = "Save AU info"), align = "left")),
+
                                          shiny::fluidRow(shiny::column(width = 12, leaflet::leafletOutput(outputId = "map", width = "100%", height = px_ht))),
                                          shiny::fluidRow(shiny::column(width = 1, shiny::actionButton(inputId = "return_df", label = "Close App, Return Changes", style = "margin-top: 5px;"))))
     ),
@@ -91,6 +102,16 @@ launch_map <- function(mloc, px_ht = 470,
                                   Longitude = NULL,
                                   Alternate.ID.1 = NULL,
                                   Alternate.Context.1 = NULL,
+                                  HUC6_Name = NULL,
+                                  HUC8_Name = NULL,
+                                  HUC10_Name = NULL,
+                                  HUC12_Name = NULL,
+                                  HUC6 = NULL,
+                                  HUC8 = NULL,
+                                  HUC10 = NULL,
+                                  HUC12 = NULL,
+                                  AU_ID = NULL,
+                                  AU_Name = NULL,
                                   Snap.Lat = NULL,
                                   Snap.Long = NULL,
                                   df = NULL)
@@ -352,6 +373,39 @@ launch_map <- function(mloc, px_ht = 470,
               cr$Snap.Lat <- NHDpoint$Snap.Lat
               cr$Snap.Long <- NHDpoint$Snap.Long
 
+              HUCinfo <- get_huc12(x = click$lng, y = click$lat,
+                                   crs = 4326) %>%
+                dplyr::mutate(HUC6 = substr(HUC12, 1, 6),
+                              HUC8 = substr(HUC12, 1, 8),
+                              HUC10 = substr(HUC12, 1, 10)) %>%
+                dplyr::left_join(orhuc6, by = "HUC6") %>%
+                dplyr::left_join(orhuc8, by = "HUC8") %>%
+                dplyr::left_join(orhuc10, by = "HUC10") %>%
+                dplyr::select(HUC6, HUC8, HUC10, HUC12, HUC6_Name, HUC8_Name, HUC10_Name, HUC12_Name) %>%
+                dplyr::distinct()
+
+              AUinfo <- nhdinfo %>%
+                dplyr::filter(Permanent_Identifier == click$properties$Permanent_Identifier) %>%
+                dplyr::select(AU_ID, AU_Name, AU_GNIS_Name, AU_GNIS, GNIS_Name) %>%
+                dplyr::mutate(AU_GNIS_Name = dplyr::case_when(grepl("_WS", AU_ID, fixed = TRUE) & is.na(AU_GNIS_Name) ~ GNIS_Name,
+                                                              !grepl("_WS", AU_ID, fixed = TRUE) ~ NA_character_,
+                                                              TRUE ~ AU_GNIS_Name),
+                              AU_GNIS = dplyr::case_when(grepl("_WS", AU_ID, fixed = TRUE) & is.na(AU_GNIS) ~ paste0(AU_ID,";"),
+                                                         !grepl("_WS", AU_ID, fixed = TRUE) ~ NA_character_,
+                                                         TRUE ~ AU_GNIS)) %>%
+                dplyr::distinct()
+
+              cr$HUC6_Name <- HUCinfo$HUC6_Name
+              cr$HUC8_Name <- HUCinfo$HUC8_Name
+              cr$HUC10_Name <- HUCinfo$HUC10_Name
+              cr$HUC12_Name <- HUCinfo$HUC12_Name
+              cr$HUC6 <- HUCinfo$HUC6
+              cr$HUC8 <- HUCinfo$HUC8
+              cr$HUC10 <- HUCinfo$HUC10
+              cr$HUC12 <- HUCinfo$HUC12
+
+              cr$AU_ID <- AUinfo$AU_ID
+              cr$AU_Name <- AUinfo$AU_Name
 
               request_NHD <- httr::GET(url = paste0("https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1/query?where=",
                                                     "ReachCode='",click$properties$ReachCode,
@@ -377,7 +431,22 @@ launch_map <- function(mloc, px_ht = 470,
 
                 output$NHDprintout <- shiny::renderPrint({
                   df <- sf::st_drop_geometry(NHDpoint) %>%
-                    dplyr::select(-Snap.Lat, -Snap.Long)
+                    dplyr::select(-Snap.Lat, -Snap.Long) %>%
+                    as.data.frame()
+                  df
+                })
+
+                output$HUCprintout <- shiny::renderPrint({
+                  df <-  sf::st_drop_geometry(HUCinfo) %>%
+                    dplyr::select(HUC8, HUC8_Name, HUC10, HUC10_Name, HUC12, HUC12_Name) %>%
+                    as.data.frame()
+                  df
+                })
+
+                output$AUprintout <- shiny::renderPrint({
+                  df <- AUinfo %>%
+                    dplyr::select(AU_ID, AU_Name, AU_GNIS_Name, AU_GNIS) %>%
+                    as.data.frame()
                   df
                 })
 
@@ -396,9 +465,8 @@ launch_map <- function(mloc, px_ht = 470,
 
               # LLID
               rm_point <- get_llidrm(llid = click$properties$LLID,
-                                     x = click$lng,
-                                     y = click$lat,
-                                     max_length = 82,
+                                     x = click$lng, y = click$lat,
+                                     crs = 4326,
                                      return_sf = TRUE)
 
               cr$LLID <- click$properties$LLID
@@ -430,7 +498,9 @@ launch_map <- function(mloc, px_ht = 470,
                                             color = "blue")
 
                 output$LLIDprintout <- shiny::renderPrint({
-                  df <- sf::st_drop_geometry(rm_point)
+                  df <- sf::st_drop_geometry(rm_point) %>%
+                    dplyr::select(NAME, LLID, River_Mile) %>%
+                    as.data.frame()
                   df
                 })
 
@@ -484,6 +554,20 @@ launch_map <- function(mloc, px_ht = 470,
           df.selectStation %>%
             dplyr::select(Alternate.ID.1, Alternate.Context.1)
         })
+
+        # AU printout ----
+        output$HUCprintout <- shiny::renderPrint({
+          df.selectStation %>%
+            dplyr::select(HUC8, HUC8_Name, HUC10, HUC10_Name, HUC12, HUC12_Name)
+        })
+
+        # AU printout ----
+        output$AUprintout <- shiny::renderPrint({
+          df.selectStation %>%
+            dplyr::select(AU_ID, AU_Name)
+        })
+
+
       }, priority = 2)
 
       # Next MLoc button ----
@@ -607,6 +691,51 @@ launch_map <- function(mloc, px_ht = 470,
         output$AWQMSprintout <- shiny::renderText({"Success! Alternate ID saved."})
       }, priority = 1)
 
+      # Save HUC button ----
+      # When HUC button is clicked, update the HUC info in cr$df
+      shiny::observeEvent(input$HUCsave, {
+
+        cr$df <- cr$df %>%
+          dplyr::mutate(HUC6 = ifelse(choices == input$selectStation,
+                                      cr$HUC6,
+                                      HUC6),
+                        HUC6_Name = dplyr::if_else(choices == input$selectStation,
+                                                   cr$HUC6_Name,
+                                                   HUC6_Name),
+                        HUC8 = ifelse(choices == input$selectStation,
+                                      cr$HUC8,
+                                      HUC8),
+                        HUC8_Name = dplyr::if_else(choices == input$selectStation,
+                                                   cr$HUC8_Name,
+                                                   HUC8_Name),
+                        HUC10 = ifelse(choices == input$selectStation,
+                                       cr$HUC10,
+                                       HUC10),
+                        HUC10_Name = dplyr::if_else(choices == input$selectStation,
+                                                    cr$HUC10_Name,
+                                                    HUC10_Name),
+                        HUC12 = ifelse(choices == input$selectStation,
+                                       cr$HUC12,
+                                       HUC12),
+                        HUC12_Name = dplyr::if_else(choices == input$selectStation,
+                                                    cr$HUC12_Name,
+                                                    HUC12_Name))
+
+        output$HUCprintout <- shiny::renderText({"Success! HUC info saved."})
+      }, priority = 1)
+
+      # Save AU ID button ----
+      # When AU button is clicked, update the AU info in cr$df
+      shiny::observeEvent(input$AUsave, {
+
+        cr$df <- cr$df %>%
+          dplyr::mutate(AU_ID = ifelse(choices == input$selectStation,
+                                                cr$AU_ID,
+                                                AU_ID))
+
+        output$AUprintout <- shiny::renderText({"Success! AU ID saved."})
+      }, priority = 1)
+
       # Save X/Y button ----
       # When Lat/Long button is clicked, update the Lat/Long in cr$df
       # update map
@@ -648,7 +777,15 @@ launch_map <- function(mloc, px_ht = 470,
                                                        "<b>Measure:</b> ", Measure, "<br>",
                                                        "<b>LLID:</b> ", LLID, "<br>",
                                                        "<b>River.Mile:</b> ", River.Mile, "<br>",
-                                                       "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>"),
+                                                       "<b>HUC8:</b> ", HUC8_Name, "<br>",
+                                                       "<b>HUC8_Name:</b> ", HUC8_Name, "<br>",
+                                                       "<b>HUC10:</b> ", HUC10, "<br>",
+                                                       "<b>HUC10_Name:</b> ", HUC10_Name, "<br>",
+                                                       "<b>HUC12:</b> ", HUC12, "<br>",
+                                                       "<b>HUC12_Name:</b> ", HUC12_Name, "<br>",
+                                                       "<b>AU_ID:</b> ", AU_ID, "<br>",
+                                                       "<b>AU_Name:</b> ", AU_Name, "<br>"
+                                                       ),
                                        label = ~paste0(Monitoring.Location.ID, ": ", Monitoring.Location.Name),
                                        lat = ~Latitude,
                                        lng = ~Longitude,
