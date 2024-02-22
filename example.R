@@ -1,6 +1,7 @@
 library(dplyr)
 library(odeqmloctools)
 library(devtools)
+library(dplyr)
 
 devtools::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
                          host = "https://api.github.com",
@@ -9,8 +10,8 @@ devtools::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
 
 # For this example pretend to only start with certain columns. Add CRS column.
 df.mloc <- odeqmloctools::mloc_example %>%
-  dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name,
-                Longitude, Latitude, Horizontal.Datum) %>%
+  #dplyr::select(Monitoring.Location.ID, Monitoring.Location.Name,
+  #              Longitude, Latitude, Horizontal.Datum) %>%
   dplyr::mutate(CRS = dplyr::case_when(Horizontal.Datum == "WGS84" ~ 4326,
                                        Horizontal.Datum == "NAD83" ~ 4269,
                                        TRUE ~ 4269))
@@ -19,6 +20,7 @@ df.mloc <- odeqmloctools::mloc_example %>%
 df.mloc2 <- odeqmloctools::launch_map(mloc = df.mloc)
 
 # Add other data once the lat/long has been reviewed in launch map()
+# Note this may take a long time to run for large data frames
 df.mloc3 <- df.mloc2 %>%
   mutate(County.Name = get_county(x = Longitude, y = Latitude, crs = CRS),
          State.Code = get_state(x = Longitude, y = Latitude, crs = CRS),
@@ -32,6 +34,8 @@ df.mloc3 <- df.mloc2 %>%
          EcoRegion3 = get_eco3code(x = Longitude, y = Latitude, crs = CRS),
          EcoRegion4 = get_eco4code(x = Longitude, y = Latitude, crs = CRS))
 
+df.mloc3 <- df.mloc %>%
+  mutate(RM = get_llidrm(llid = LLID, x = Longitude, y = Latitude, crs = CRS))
 
 # Get AU_ID info. Must already have the Permanent Identifier.
 df.mloc4 <- odeqmloctools::mloc_example %>%
