@@ -40,11 +40,18 @@ get_measure <- function(pid, x, y, crs, return_sf=FALSE){
 get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 
   # Test data
-  #pid="165555667"
-  #reachcode="18010206003567"
-  #crs=4326
-  #y=42.09361
-  #x=-122.3822
+  # pid = "165555667"
+  # reachcode = "18010206003567"
+  # crs = 4326
+  # y = 42.09361
+  # x = -122.3822
+  # return_sf = TRUE
+
+  # pid = "{B34528B1-726E-4387-9559-652A099A0FAE}"
+  # crs = 4326
+  # y = 45.57767
+  # x = -122.7476
+  # return_sf = TRUE
 
   # web mercator
   #to_crs <- 3857
@@ -62,77 +69,77 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
     warning("Error, NA returned")
 
     if (return_sf) {
-      return(dplyr::mutate(site,
+
+      point <- sf::st_as_sf(data.frame(Longitude = x, Latitude = y),
+                            coords = c("Longitude", "Latitude"), crs = crs) %>%
+        sf::st_transform(crs = 4326)
+
+      return(dplyr::mutate(point,
                            GNIS_Name = NA_character_,
                            Permanent_Identifier = NA_character_,
                            ReachCode = NA_character_,
                            Measure = NA_real_,
                            Snap.Lat = NA_real_,
-                           Snap.Long - NA_real_) %>%
-               dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long, geometry) %>%
-               sf::st_transform(crs = 4326))
+                           Snap.Long = NA_real_) %>%
+               dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long, geometry))
+
     } else {
       return(NA_character_)
     }
   }
 
   # feature service out crs, WGS84
-  fs_crs <- 4326
+  #fs_crs <- 4326
 
   # Make a point from x and y  and make sure it's in the same projection as the line
   point <- sf::st_as_sf(data.frame(Longitude = x, Latitude = y),
                         coords = c("Longitude", "Latitude"), crs = crs) %>%
-    sf::st_transform(point, crs = sf::st_crs(line_df))
-
-  reach_df <- line_df %>%
-    sf::st_drop_geometry()
+    sf::st_transform(crs = sf::st_crs(line_df))
 
   # get measure value at top and bottom
-  reach <- line_df %>%
-    sf::st_cast( to = "POINT") %>%
-    dplyr::mutate(Measure = unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE))
+  meas_vector <- as.data.frame(sf::st_coordinates(line_df))$M
+  meas_top <- meas_vector[1]
+  meas_bot <- meas_vector[length(meas_vector)]
 
-  meas_max <- max(reach$Measure)
-  meas_min <- min(reach$Measure)
+  top_upstream <- (meas_top > meas_bot)
 
-  rm(reach)
-
-  # Split line into segments
   reach1 <- line_df %>%
-    sf::st_transform(crs = fs_crs) %>%
-    sf::st_cast(to = "LINESTRING") %>%
+    #sf::st_transform(crs = fs_crs) %>%
     sf::st_zm() %>%
-    split_lines(max_length = 25, id = "ReachCode")
+    sf::st_segmentize(dfMaxLength = units::set_units(5, m)) %>%
+    sf::st_cast(to = "POINT") %>%
+    dplyr::group_by(ReachCode) %>%
+    dplyr::mutate(row = dplyr::row_number()) %>%
+    dplyr::ungroup()
 
   # segment length in meters
-  reach1$length_seg <- units::set_units(sf::st_length(reach1), m)
+  if (top_upstream) {
+    # upstream end at top
+    reach1$length_seg <- c(sf::st_distance(x = reach1[-1,], y = reach1[-nrow(reach1),], by_element = TRUE), units::set_units(0, m))
 
-  reach_points <- sf::st_cast(reach1, to = "POINT")
-  reach_points$row = as.numeric(row.names(reach_points))
+  } else {
+    # upstream end at bottom
+    reach1$length_seg <- c(units::set_units(0, m), sf::st_distance(x = reach1[-nrow(reach1),], y = reach1[-1,], by_element = TRUE))
+  }
 
-  # Get only the first point on each linestring segment, and the last point (most upstream). Use the row number to filter.
-  reach_points <- dplyr::filter(reach_points, row %in% c(1:nrow(reach_points),  max(reach_points$row)))
+  reach1$Snap.Distance <- sf::st_distance(reach1, point, by_element = FALSE)[,1]
 
-  # Set first point to length zero
-  reach_points[1,c("length_seg")] <- 0
-
-  # Snap distance in meters because of crs
-  reach_points$Snap.Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
-
-  if (units::set_units(min(reach_points$Snap.Distance), m) > units::set_units(400, m))
+  if (units::set_units(min(reach1$Snap.Distance), m) > units::set_units(400, m)) {
     warning("Snap distance is > 400 meters. Is the x and y near the target Reach?")
+    }
 
   # Calculate measure, filter to the closest point and clean up
-  df_meas <- reach_points %>%
+  df_meas <- reach1 %>%
+    dplyr::arrange(if (top_upstream) {-row} else {row}) %>%
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
-                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
-                  ) %>%
+                  Measure = round(meas_top - ((max(Total_Meters) - Total_Meters) * (meas_top - meas_bot) / max(Total_Meters)), 2)) %>%
     dplyr::slice_min(Snap.Distance, with_ties = FALSE) %>%
-    dplyr::left_join(reach_df) %>%
     dplyr::mutate(Snap.Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
                   Snap.Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
     sf::st_zm() %>%
     dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long)
+
+  #ggplot2::ggplot() + ggplot2::geom_sf(data = df_meas) + ggplot2::geom_sf(data = point) + ggplot2::geom_sf(data = sf::st_zm(line_df))
 
   if (return_sf) {
     return(df_meas)
@@ -168,61 +175,47 @@ get_measure2 <- function(line, point, id, return_df = FALSE, nhdplus = FALSE){
   # Make sure the point and line are in the same projection
   point <- sf::st_transform(point, crs = sf::st_crs(line))
 
-  reach_df <- line %>%
-    sf::st_drop_geometry()
-
   # get measure value at top and bottom
-  reach <- line %>%
-    sf::st_cast( to = "POINT") %>%
-    dplyr::mutate(Measure = unlist(lapply(geometry, FUN = function(x) {x[4]}), recursive = TRUE))
+  meas_vector <- as.data.frame(sf::st_coordinates(line))$M
+  meas_top <- meas_vector[1]
+  meas_bot <- meas_vector[length(meas_vector)]
 
-  if (nhdplus) {
+  top_upstream <- (meas_top > meas_bot)
 
-    meas_max <- max(reach$TOMEAS)
-    meas_min <- min(reach$FROMMEAS)
-
-  } else {
-    meas_max <- max(reach$Measure)
-    meas_min <- min(reach$Measure)
-  }
-
-  rm(reach)
-
-  # Split line into segments
   reach1 <- line %>%
     #sf::st_transform(crs = fs_crs) %>%
-    sf::st_cast(to = "LINESTRING") %>%
     sf::st_zm() %>%
-    split_lines(max_length = 25, id = id)
+    sf::st_segmentize(dfMaxLength = units::set_units(5, m)) %>%
+    sf::st_cast(to = "POINT") %>%
+    dplyr::group_by({{id}}) %>%
+    dplyr::mutate(row = dplyr::row_number()) %>%
+    dplyr::ungroup()
 
   # segment length in meters
-  reach1$length_seg <- units::set_units(sf::st_length(reach1), m)
+  if (top_upstream) {
+    # upstream end at top
+    reach1$length_seg <- c(sf::st_distance(x = reach1[-1,], y = reach1[-nrow(reach1),], by_element = TRUE), units::set_units(0, m))
 
-  reach_points <- sf::st_cast(reach1, to = "POINT")
-  reach_points$row = as.numeric(row.names(reach_points))
+  } else {
+    # upstream end at bottom
+    reach1$length_seg <- c(units::set_units(0, m), sf::st_distance(x = reach1[-nrow(reach1),], y = reach1[-1,], by_element = TRUE))
+  }
 
-  # Get only the first point on each linestring segment, and the last point (most upstream). Use the row number to filter.
-  reach_points <- dplyr::filter(reach_points, row %in% c(1:nrow(reach_points),  max(reach_points$row)))
+  reach1$Snap.Distance <- sf::st_distance(reach1, point, by_element = FALSE)[,1]
 
-  # Set first point to length zero
-  reach_points[1,c("length_seg")] <- 0
-
-  # Snap distance in meters because of crs
-  reach_points$Snap.Distance <- sf::st_distance(reach_points, point, by_element = TRUE)
-
-  if (units::set_units(min(reach_points$Snap.Distance), m) > units::set_units(400, m))
-    warning("Snap distance is > 400 meters. Is the point near the line?")
+  if (units::set_units(min(reach1$Snap.Distance), m) > units::set_units(400, m))
+    warning("Snap distance is > 400 meters. Is the x and y near the target Reach?")
 
   # Calculate measure, filter to the closest point and clean up
-  df_meas <- reach_points %>%
+  df_meas <- reach1 %>%
+    dplyr::arrange(if (top_upstream) {-row} else {row}) %>%
     dplyr::mutate(Total_Meters = as.numeric(cumsum(length_seg)),
-                  Measure = round(meas_min + ((max(Total_Meters) - Total_Meters) * (meas_max - meas_min) / max(Total_Meters)), 2)
-                  ) %>%
+                  Measure = round(meas_top - ((max(Total_Meters) - Total_Meters) * (meas_top - meas_bot) / max(Total_Meters)), 2)) %>%
     dplyr::slice_min(Snap.Distance, with_ties = FALSE) %>%
     dplyr::mutate(Snap.Lat = unlist(lapply(geometry, FUN = function(x) {x[2]}), recursive = TRUE),
                   Snap.Long = unlist(lapply(geometry, FUN = function(x) {x[1]}), recursive = TRUE)) %>%
-    sf::st_drop_geometry() %>%
-    dplyr::select(Measure, Snap.Lat, Snap.Long, Snap.Distance)
+    sf::st_zm() %>%
+    dplyr::select(GNIS_Name, Permanent_Identifier, ReachCode, Measure, Snap.Lat, Snap.Long)
 
   if (return_df) {
     return(df_meas)
