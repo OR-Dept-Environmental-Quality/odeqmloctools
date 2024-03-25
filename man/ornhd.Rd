@@ -5,7 +5,7 @@
 \alias{ornhd}
 \title{Oregon DEQ NHD}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1544909 rows and 24 columns.
+An object of class \code{data.frame} with 1544909 rows and 24 columns.
 }
 \usage{
 data(ornhd)
