@@ -1,7 +1,7 @@
 Package: odeqmloctools
 Type: Package
 Title: ODEQ Monitoring Location Tools
-Version: 0.5.1
+Version: 0.6.0
 Authors@R: c(person(given = "Ryan",
            family = "Michie",
            role = c("aut", "cre"),
