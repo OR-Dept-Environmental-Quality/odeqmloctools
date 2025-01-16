@@ -17,6 +17,8 @@
 #'         digits is the subbasin code as defined by FIPS 103.  The next six
 #'         digits are randomly assigned, sequential numbers that are unique
 #'         within a subbasin, length 14.
+#'   \item FMEAS: From measure value
+#'   \item TMEAS: To measure value
 #'   \item FlowDir: Direction of flow relative to coordinate order, length 4.
 #'   \item WBArea_Permanent_Identifier: NHD Waterbody feature Permanent Identifier
 #'   \item FType: Three-digit integer value; unique identifier of a feature type.
