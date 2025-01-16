@@ -8,7 +8,7 @@ available REST feature services to query and extract location metadata.
 ## Install
 
 ```R
-devtools::install_github("DEQrmichie/odeqmloctools", host = "https://api.github.com", 
+devtools::install_github("OR-Dept-Environmental-Quality/odeqmloctools", host = "https://api.github.com", 
                          dependencies = TRUE, force = TRUE, upgrade = "never")
 ```
 ## Example
