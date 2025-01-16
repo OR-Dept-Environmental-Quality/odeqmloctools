@@ -52,7 +52,7 @@ ornhd0 <- odeqmloctools::ornhd[, c("Permanent_Identifier", "GLOBALID", "StreamOr
 ornhd <- ornhd.raw %>%
   dplyr::left_join(ornhd0, by = c("Permanent_Identifier", "GLOBALID")) %>%
   dplyr::select(Permanent_Identifier, FDate, Resolution, GNIS_ID, GNIS_Name,
-                LengthKM, ReachCode, FlowDir, WBArea_Permanent_Identifier,
+                LengthKM, ReachCode, FMEAS, TMEAS, FlowDir, WBArea_Permanent_Identifier,
                 FType, FCode, MainPath, InNetwork, AU_ID, AU_Name, AU_Description,
                 AU_WBType, AU_UseCode, AU_GNIS_Name, AU_GNIS,
                 AU_LenMile, AU_AreaAcr, StreamOrder, GLOBALID) %>%
