@@ -97,9 +97,8 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
     sf::st_transform(crs = sf::st_crs(line_df))
 
   # get measure value at top and bottom
-  meas_vector <- as.data.frame(sf::st_coordinates(line_df))$M
-  meas_top <- meas_vector[1]
-  meas_bot <- meas_vector[length(meas_vector)]
+  meas_top <- dplyr::filter(ornhd, Permanent_Identifier ==  pid) %>% dplyr::pull(FMEAS)
+  meas_bot <- dplyr::filter(ornhd, Permanent_Identifier ==  pid) %>% dplyr::pull(TMEAS)
 
   top_upstream <- (meas_top > meas_bot)
 
