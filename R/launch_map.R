@@ -6,8 +6,8 @@
 #'    if not present and the values set to NA. The full set of mloc column names
 #'    can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
 #'    or as a data frame using \code{\link{df_mloc}}. "Snap.Lat" and "Snap.Long"
-#'    "HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
-#'    "AU_ID", "AU_Name", "AU_GNIS" are added.
+#'    "HUC6", "HUC6_Name","HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
+#'    "AU_ID", "AU_Name" are added.
 #' @param px_ht Height of the map in pixels. Default is 470 which fits on most
 #'              standard laptop screens. The minimum height is 300 pixels.
 #' @param hide_layers vector of the map layer names that remain hidden by default.
@@ -36,8 +36,8 @@ launch_map <- function(mloc, px_ht = 470,
 
   px_ht <- paste0(px_ht,"px")
 
-  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
-                                           "AU_ID", "AU_Name", "AU_GNIS_Name", "AU_GNIS", "Snap.Lat", "Snap.Long")) %in% names(mloc)]
+  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "HUC6_Name", "HUC8_Name", "HUC10_Name","HUC12_Name", "HUC6", "HUC8", "HUC10", "HUC12",
+                                           "AU_ID", "AU_Name", "Snap.Lat", "Snap.Long")) %in% names(mloc)]
 
   mloc <- cbind(mloc, missing_cols)
 
@@ -555,7 +555,7 @@ launch_map <- function(mloc, px_ht = 470,
             dplyr::select(Alternate.ID.1, Alternate.Context.1)
         })
 
-        # AU printout ----
+        # HUC printout ----
         output$HUCprintout <- shiny::renderPrint({
           df.selectStation %>%
             dplyr::select(HUC8, HUC8_Name, HUC10, HUC10_Name, HUC12, HUC12_Name)
@@ -731,7 +731,10 @@ launch_map <- function(mloc, px_ht = 470,
         cr$df <- cr$df %>%
           dplyr::mutate(AU_ID = ifelse(choices == input$selectStation,
                                                 cr$AU_ID,
-                                                AU_ID))
+                                                AU_ID),
+                        AU_Name = ifelse(choices == input$selectStation,
+                                       cr$AU_Name,
+                                       AU_Name))
 
         output$AUprintout <- shiny::renderText({"Success! AU ID saved."})
       }, priority = 1)
