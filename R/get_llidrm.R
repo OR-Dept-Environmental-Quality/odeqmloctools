@@ -48,6 +48,15 @@ get_llidrm_ <- function(llid, x, y, crs=4326, return_sf=FALSE){
   # llid <- "1223681420918"
   # return_sf = FALSE
 
+  # Test data
+  # y = 45.57717
+  # x = -122.7482
+  # crs = 4326
+  # llid <- "1227618456580"
+  # return_sf = FALSE
+
+
+
   # Oregon GIC Lambert (ft) NAD83(HARN)
   to_crs <- 2994
 
@@ -87,10 +96,9 @@ get_llidrm_ <- function(llid, x, y, crs=4326, return_sf=FALSE){
   fs_stream_name <- unique(line_df$NAME)[1]
   rm_min <- min(line_df$RM_MIN)
 
-  # get measure value at top and bottom, measured in feet (convert to miles)
-  meas_vector <- as.data.frame(sf::st_coordinates(line_df))$M
-  meas_top <- meas_vector[1] * 0.000189394
-  meas_bot <- meas_vector[length(meas_vector)] * 0.000189394
+  # get measure value at top and bottom, measured in miles
+  meas_top <- line_df$RM_MAX
+  meas_bot <- line_df$RM_MIN
 
   top_upstream <- (meas_top > meas_bot)
 
@@ -104,14 +112,14 @@ get_llidrm_ <- function(llid, x, y, crs=4326, return_sf=FALSE){
     dplyr::mutate(row = dplyr::row_number()) %>%
     dplyr::ungroup()
 
-  # segment length in miles
-  if (top_upstream) {
+  # segment length in feet
+  if (!top_upstream) {
     # upstream end at top
-    reach1$length_seg <- c(sf::st_distance(x = reach1[-1,], y = reach1[-nrow(reach1),], by_element = TRUE), units::set_units(0, mi))
+    reach1$length_seg <- c(sf::st_distance(x = reach1[-1,], y = reach1[-nrow(reach1),], by_element = TRUE), units::set_units(0, ft))
 
   } else {
     # upstream end at bottom
-    reach1$length_seg <- c(units::set_units(0, mi), sf::st_distance(x = reach1[-nrow(reach1),], y = reach1[-1,], by_element = TRUE))
+    reach1$length_seg <- c(units::set_units(0, ft), sf::st_distance(x = reach1[-nrow(reach1),], y = reach1[-1,], by_element = TRUE))
   }
 
   reach1$Snap.Distance <- sf::st_distance(reach1, point, by_element = FALSE)[,1]
@@ -122,8 +130,8 @@ get_llidrm_ <- function(llid, x, y, crs=4326, return_sf=FALSE){
 
   # Calculate measure, filter to the closest point and clean up
   df_meas <- reach1 %>%
-    dplyr::arrange(if (top_upstream) {-row} else {row}) %>%
-    dplyr::mutate(Total_Mile = as.numeric(cumsum(length_seg)),
+    dplyr::arrange(if (top_upstream) {row} else {-row}) %>%
+    dplyr::mutate(Total_Mile = as.numeric(units::set_units(cumsum(length_seg), mi)),
                   River_Mile = round(rm_min + Total_Mile, 2)) %>%
     dplyr::slice_min(Snap.Distance, with_ties = FALSE) %>%
     sf::st_transform(crs = 4326) %>% # for leaflet and getting snap lat/long
