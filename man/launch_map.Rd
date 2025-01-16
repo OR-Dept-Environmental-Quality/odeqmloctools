@@ -13,8 +13,8 @@ Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name',
 if not present and the values set to NA. The full set of mloc column names
 can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
 or as a data frame using \code{\link{df_mloc}}. "Snap.Lat" and "Snap.Long"
-"HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
-"AU_ID", "AU_Name", "AU_GNIS" are added.}
+"HUC6", "HUC6_Name","HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
+"AU_ID", "AU_Name" are added.}
 
 \item{px_ht}{Height of the map in pixels. Default is 470 which fits on most
 standard laptop screens. The minimum height is 300 pixels.}
