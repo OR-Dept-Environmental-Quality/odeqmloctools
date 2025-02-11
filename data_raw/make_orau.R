@@ -6,10 +6,12 @@ library(dplyr)
 library(arcpullr)
 library(sf)
 library(odeqmloctools)
+library(units)
 
 
 # Read from GIS from REST Service  ---------------------------------------------
 
+# 2022
 # AU_base_url <- "https://services.arcgis.com/uUvqNMGPm7axC2dD/ArcGIS/rest/services/IR_2022_Final/FeatureServer/"
 # AU_SR_id <- 34
 # AU_WB_id <- 43
@@ -19,8 +21,13 @@ library(odeqmloctools)
 # AU_WB_fc <- get_spatial_layer(url = paste0(AU_base_url, AU_WB_id), sf_type = "esriGeometryPolygon")
 # AU_WS_fc <- get_spatial_layer(url = paste0(AU_base_url, AU_WS_id), sf_type = "esriGeometryPolygon")
 
+# 2024
+# AU_base_url <- "https://services.arcgis.com/uUvqNMGPm7axC2dD/arcgis/rest/services/Oregon_AUs/FeatureServer"
+# AU_table_id <- 5
 
-AU_dsn <- # path to AU Features directory  "GIS/Support_Features.gdb"
+# AU_table <- get_table_layer(url = paste0(AU_base_url, AU_table_id))
+
+AU_dsn <- "OR_AU.gdb"
 AU_SR_fc <- "AU_OR_Rivers_CoastLine"
 AU_WB_fc <- "AU_OR_Waterbodies_missing_flowlines"
 AU_WS_fc <- "AU_OR_Watershed_Area"
@@ -30,14 +37,18 @@ AU_SR <- sf::st_read(dsn = AU_dsn,
             stringsAsFactors = FALSE) %>%
   sf::st_drop_geometry() %>%
   dplyr::rename(AU_LenMile = AU_LenMiles, AU_AreaAcre = AU_AreaAcr) %>%
-  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode",  "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM", "AQWMS_TXT", "AU_Description"))) %>%
+  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode",
+                         "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM",
+                         "AQWMS_TXT", "AU_Description"))) %>%
   dplyr::mutate(GIS_Source = "Rivers_CoastLine")
 
 AU_WB <- sf::st_read(dsn = AU_dsn,
                       layer = AU_WB_fc,
                       stringsAsFactors = FALSE) %>%
   sf::st_drop_geometry() %>%
-  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode", "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM", "AQWMS_TXT", "AU_Description"))) %>%
+  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode",
+                         "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM",
+                         "AQWMS_TXT", "AU_Description"))) %>%
   dplyr::mutate(GIS_Source = "Waterbodies")
 
 AU_WS <- sf::st_read(dsn = AU_dsn,
@@ -45,7 +56,9 @@ AU_WS <- sf::st_read(dsn = AU_dsn,
                       stringsAsFactors = FALSE) %>%
   sf::st_drop_geometry() %>%
   dplyr::rename(AU_LenMile = AU_LenMiles, AU_AreaAcre = AU_AreaAcr) %>%
-  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode", "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM", "AQWMS_TXT", "AU_Description"))) %>%
+  dplyr::select(any_of(c("AU_ID", "AU_Name", "AU_WBType", "AU_UseCode",
+                         "AU_LenMile", "AU_AreaAcre", "HUC12", "AQWMS_NUM",
+                         "AQWMS_TXT", "AU_Description"))) %>%
   dplyr::mutate(GIS_Source = "Watershed_Area")
 
 huc6 <- odeqmloctools::orhuc6 %>%
