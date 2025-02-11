@@ -1,9 +1,9 @@
 library(dplyr)
 library(odeqmloctools)
-library(devtools)
+library(remotes)
 library(dplyr)
 
-devtools::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
+remotes::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
                          host = "https://api.github.com",
                          dependencies = TRUE, force = TRUE, upgrade = "never")
 
