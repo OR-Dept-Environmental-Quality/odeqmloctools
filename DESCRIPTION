@@ -31,3 +31,5 @@ Imports:
     tidyr (>= 1.0.0)
 Remotes:
     github::OR-Dept-Environmental-Quality/odeqcdr@HEAD
+Depends:
+    R (>= 3.5.0)
