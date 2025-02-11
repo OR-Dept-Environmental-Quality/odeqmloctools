@@ -36,7 +36,11 @@ launch_map <- function(mloc, px_ht = 470,
 
   px_ht <- paste0(px_ht,"px")
 
-  missing_cols <- df_mloc()[,!make.names(c(odeqcdr::cols_mloc(), "HUC6_Name", "HUC8_Name", "HUC10_Name","HUC12_Name", "HUC6", "HUC8", "HUC10", "HUC12",
+  # Column names for the Monitoring Locations worksheet in Oregon DEQ's
+  # continuous monitoring template
+  mloc_col_names <- odeqcdr::cols_mloc()
+
+  missing_cols <- df_mloc()[,!make.names(c(mloc_col_names, "HUC6_Name", "HUC8_Name", "HUC10_Name","HUC12_Name", "HUC6", "HUC8", "HUC10", "HUC12",
                                            "AU_ID", "AU_Name", "Snap.Lat", "Snap.Long")) %in% names(mloc)]
 
   mloc <- cbind(mloc, missing_cols)
