@@ -1,7 +1,7 @@
 Package: odeqmloctools
 Type: Package
 Title: ODEQ Monitoring Location Tools
-Version: 0.91
+Version: 1.0.0
 Authors@R: c(person(given = "Ryan",
            family = "Michie",
            role = c("aut", "cre"),
@@ -12,9 +12,11 @@ Description: This package provides QA/QC support for review and editing
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports: 
+    bslib (>= 0.9.0),
     dplyr (>= 1.0.0),
+    DT (>= 0.33),
     geojsonsf (>= 2.0.0),
     httr (>= 1.4.0),
     leafem (>= 0.1.1),
@@ -24,8 +26,7 @@ Imports:
     lwgeom (>= 0.2-8),
     magrittr (>= 2.0.1),
     purrr (>= 0.3.4),
-    odeqcdr (>= 0.31),
-    sf (>= 0.9-6),
+    sf (>= 1.0-17),
     shiny (>= 1.5.0),
     smoothr (>= 0.2.2),
     tidyr (>= 1.0.0)
