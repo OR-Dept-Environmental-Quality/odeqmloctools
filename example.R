@@ -17,7 +17,34 @@ df.mloc <- odeqmloctools::mloc_example %>%
                                        TRUE ~ 4269))
 
 # Review and edit the information in the map
-df.mloc2 <- odeqmloctools::launch_map(mloc = df.mloc)
+df.mloc2 <- odeqmloctools::launch_map(mloc = df.mloc,
+                                       px_ht = 470, hide_layers = c("LLID Streams", "Hydrography"),
+                                       col_mapping = c(Monitoring.Location.ID = "Monitoring.Location.ID",
+                                                       Monitoring.Location.Name = "Monitoring.Location.Name",
+                                                       Latitude = "Latitude",
+                                                       Longitude = "Longitude",
+                                                       Monitoring.Location.Status.ID = "Monitoring.Location.Status.ID",
+                                                       Monitoring.Location.Type = "Monitoring.Location.Type",
+                                                       Permanent.Identifier = "Permanent.Identifier",
+                                                       Reachcode = "Reachcode",
+                                                       Measure = "Measure",
+                                                       GNIS_Name = "GNIS_Name",
+                                                       River.Mile = "River.Mile",
+                                                       LLID = "LLID",
+                                                       Alternate.ID.1 = "Alternate.ID.1",
+                                                       Alternate.Context.1 = "Alternate.Context.1",
+                                                       HUC6_Name = "HUC6_Name",
+                                                       HUC8_Name = "HUC8_Name",
+                                                       HUC10_Name = "HUC10_Name",
+                                                       HUC12_Name = "HUC12_Name",
+                                                       HUC6 = "HUC6",
+                                                       HUC8 = "HUC8",
+                                                       HUC10 = "HUC10",
+                                                       HUC12 = "HUC12",
+                                                       AU_ID = "AU_ID",
+                                                       AU_Name = "AU_Name",
+                                                       Snap.Lat = "Snap.Lat",
+                                                       Snap.Long = "Snap.Long"))
 
 # Add other data once the lat/long has been reviewed in launch map()
 # Note this may take a long time to run for large data frames
