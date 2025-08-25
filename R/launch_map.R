@@ -1,13 +1,85 @@
 #' Launch a web map in a browser to review and edit monitoring location information
 #'
+#' This function allows the review and edit of monitoring location information
+#' in an interactive map and table view. The app launches a web browser window that
+#' contains two tabs: A map and a table. In the map, a user can click anywhere to
+#' populate the Latitude and Longitude text box. Clicking save will save the
+#' coordinates in the table and move the marker to the new location. Clicking on the
+#' NHD or LLID lines will populate the text boxes with relevant values at those
+#' locations. Clicking save will update the information in the table. Alternatively,
+#' values may be edited directly in the table Tab. Double click on a cell to edit
+#' the value. Certain cells used internally by the app are not editable in table
+#' including Monitoring.Location.ID, Monitoring.Location.Name, and Latitude/Longitude.
+#'
+#' Attributes that can be added or edited to each monitoring location include:
+#'
+#' \itemize{
+#'      \item{'Latitude'}
+#'      \item{'Longitude'}
+#'      \item{'Monitoring.Location.Type'}
+#'      \item{'Permanent.Identifier'}
+#'      \item{'Reachcode'}
+#'      \item{'Measure'}
+#'      \item{'GNIS_Name'}
+#'      \item{'LLID'}
+#'      \item{'River.Mile'}
+#'      \item{'Alternate.ID.1'}
+#'      \item{'Alternate.Context.1'}
+#'      \item{'HUC6'}
+#'      \item{'HUC6_Name'}
+#'      \item{'HUC8'}
+#'      \item{'HUC8_Name'}
+#'      \item{'HUC10'}
+#'      \item{'HUC10_Name'}
+#'      \item{'HUC12'}
+#'      \item{'HUC12_Name'}
+#'      \item{'AU_ID'}
+#'      \item{'AU_Name'}
+#'      }
+#'
 #' @param mloc Data frame of the monitoring location information.
-#'    Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name',
-#'    'Latitude', and 'Longitude'. Other columns are optional but will be added
-#'    if not present and the values set to NA. The full set of mloc column names
-#'    can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
-#'    or as a data frame using \code{\link{df_mloc}}. "Snap.Lat" and "Snap.Long"
-#'    "HUC6", "HUC6_Name","HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
-#'    "AU_ID", "AU_Name" are added.
+#'    Required data frame columns include:
+#'    \itemize{
+#'      \item{'Monitoring.Location.ID'}
+#'      \item{'Monitoring.Location.Name'}
+#'      \item{'Latitude'}
+#'      \item{'Longitude'}
+#'      }
+#'
+#'    The columns listed below are optional but will be added by the tool.
+#'
+#'    \itemize{
+#'      \item{'Monitoring.Location.Type'}
+#'      \item{'Permanent.Identifier'}
+#'      \item{'Reachcode'}
+#'      \item{'Measure'}
+#'      \item{'GNIS_Name'}
+#'      \item{'LLID'}
+#'      \item{'River.Mile'}
+#'      \item{'Alternate.ID.1'}
+#'      \item{'Alternate.Context.1'}
+#'      \item{'HUC6'}
+#'      \item{'HUC6_Name'}
+#'      \item{'HUC8'}
+#'      \item{'HUC8_Name'}
+#'      \item{'HUC10'}
+#'      \item{'HUC10_Name'}
+#'      \item{'HUC12'}
+#'      \item{'HUC12_Name'}
+#'      \item{'AU_ID'}
+#'      \item{'AU_Name'}
+#'      \item{'Snap.Lat'}
+#'      \item{'Snap.Long'}
+#'      }
+#'
+#'    If the column names in 'mloc' differ from those listed above the existing
+#'    column names can be mapped to the names used in the function using 'col_mapping'.
+#'
+#'    If optional columns are not present they will be added with initial values set to NA.
+#'    Any other columns can be included in 'mloc'. They will not be modified by the function.
+#'
+#'    The full set of mloc columns can be retrieved using \code{\link{df_mloc}}.
+#'
 #' @param px_ht Height of the map in pixels. Default is 470 which fits on most
 #'              standard laptop screens. The minimum height is 300 pixels.
 #' @param hide_layers vector of the map layer names that remain hidden by default.
@@ -16,11 +88,157 @@
 #'           layers use hide_layers = NULL.
 #'           Options include any of the following: "Review Stations", "AWQMS Stations",
 #'           "NHD Streams", "LLID Streams", "Hydrography", and "Oregon Imagery".
+#' @param col_mapping A named character vector that maps the column
+#'                    names used in 'mloc' to those used in the function.
+#'                    The default mapping is set to the required column names.
+#'                    This assumes the names in your 'mloc' input are exactly the same as
+#'                    what is needed by the function. If the names differ, copy the mapping
+#'                    below to edit as needed. E.g. Function.Column.Name = "My.Column.Name".
+#'                    All 26 column names must be include in the vector, even if
+#'                    if they are not in 'mloc'.
+#'
+#'                    col_mapping = c(Monitoring.Location.ID = "Monitoring.Location.ID",
+#'                                    Monitoring.Location.Name = "Monitoring.Location.Name",
+#'                                    Latitude = "Latitude",
+#'                                    Longitude = "Longitude",
+#'                                    Monitoring.Location.Status.ID = "Monitoring.Location.Status.ID",
+#'                                    Monitoring.Location.Type = "Monitoring.Location.Type",
+#'                                    Permanent.Identifier = "Permanent.Identifier",
+#'                                    Reachcode = "Reachcode",
+#'                                    Measure = "Measure",
+#'                                    GNIS_Name = "GNIS_Name",
+#'                                    River.Mile = "River.Mile",
+#'                                    LLID = "LLID",
+#'                                    Alternate.ID.1 = "Alternate.ID.1",
+#'                                    Alternate.Context.1 = "Alternate.Context.1",
+#'                                    HUC6_Name = "HUC6_Name",
+#'                                    HUC8_Name = "HUC8_Name",
+#'                                    HUC10_Name = "HUC10_Name",
+#'                                    HUC12_Name = "HUC12_Name",
+#'                                    HUC6 = "HUC6",
+#'                                    HUC8 = "HUC8",
+#'                                    HUC10 = "HUC10",
+#'                                    HUC12 = "HUC12",
+#'                                    AU_ID = "AU_ID",
+#'                                    AU_Name = "AU_Name",
+#'                                    Snap.Lat = "Snap.Lat",
+#'                                    Snap.Long = "Snap.Long")
+#'
 #' @export
-#' @return Launches a leaflet map within a Shiny app. Returns mloc data frame with any saved changes on app close.
+#' @return Returns mloc data frame with any saved changes on app close.
 
 launch_map <- function(mloc, px_ht = 470,
-                       hide_layers = c("LLID Streams", "Hydrography")){
+                       hide_layers = c("LLID Streams", "Hydrography"),
+                       col_mapping = c(Monitoring.Location.ID = "Monitoring.Location.ID",
+                                       Monitoring.Location.Name = "Monitoring.Location.Name",
+                                       Latitude = "Latitude",
+                                       Longitude = "Longitude",
+                                       Monitoring.Location.Status.ID = "Monitoring.Location.Status.ID",
+                                       Monitoring.Location.Type = "Monitoring.Location.Type",
+                                       Permanent.Identifier = "Permanent.Identifier",
+                                       Reachcode = "Reachcode",
+                                       Measure = "Measure",
+                                       GNIS_Name = "GNIS_Name",
+                                       River.Mile = "River.Mile",
+                                       LLID = "LLID",
+                                       Alternate.ID.1 = "Alternate.ID.1",
+                                       Alternate.Context.1 = "Alternate.Context.1",
+                                       HUC6_Name = "HUC6_Name",
+                                       HUC8_Name = "HUC8_Name",
+                                       HUC10_Name = "HUC10_Name",
+                                       HUC12_Name = "HUC12_Name",
+                                       HUC6 = "HUC6",
+                                       HUC8 = "HUC8",
+                                       HUC10 = "HUC10",
+                                       HUC12 = "HUC12",
+                                       AU_ID = "AU_ID",
+                                       AU_Name = "AU_Name",
+                                       Snap.Lat = "Snap.Lat",
+                                       Snap.Long = "Snap.Long")){
+
+
+  # Steps
+  # 0. Setup and checks
+  # 1. make a vector of original column names and order
+  # 2. update df column names to tool col names
+  # 3. Create a df of only required cols
+  # 4. make second df of cols not used by tool + plus "Monitoring.Location.ID" for join back.
+  # 5. Run shiny tool
+  # 6. join back cols not used by tool
+  # 7. rename the cols to the original name
+  # 8. return df
+
+  # Setup ----------------------------------------------------------------------
+
+  # Required Columns
+  col.req <- c("Monitoring.Location.ID",
+               "Monitoring.Location.Name",
+               "Latitude",
+               "Longitude")
+
+  # Optional columns that will be added to output
+  col.opt <- c("Monitoring.Location.Type",
+               "Monitoring.Location.Status.ID",
+               "Permanent.Identifier",
+               "Reachcode",
+               "Measure",
+               "GNIS_Name",
+               "River.Mile",
+               "LLID",
+               "Alternate.ID.1",
+               "Alternate.Context.1",
+               "HUC6_Name",
+               "HUC8_Name",
+               "HUC10_Name",
+               "HUC12_Name",
+               "HUC6",
+               "HUC8",
+               "HUC10",
+               "HUC12",
+               "AU_ID",
+               "AU_Name",
+               "Snap.Lat",
+               "Snap.Long")
+
+  # Column data types
+  col.df <- data.frame(Monitoring.Location.ID = NA_character_,
+                       Monitoring.Location.Name = NA_character_,
+                       Monitoring.Location.Type = NA_character_,
+                       Latitude = NA_real_,
+                       Longitude = NA_real_,
+                       Alternate.ID.1 = NA_character_,
+                       Alternate.Context.1 = NA_character_,
+                       Reachcode = NA_character_,
+                       Measure = NA_real_,
+                       GNIS_Name = NA_character_,
+                       River.Mile = NA_real_,
+                       LLID = NA_character_,
+                       Permanent.Identifier = NA_character_,
+                       Monitoring.Location.Status.ID = NA_character_,
+                       Monitoring.Location.Status.Comment = NA_character_,
+                       HUC6_Name = NA_character_,
+                       HUC8_Name = NA_character_,
+                       HUC10_Name = NA_character_,
+                       HUC12_Name = NA_character_,
+                       HUC6 = NA_character_,
+                       HUC8 = NA_character_,
+                       HUC10 = NA_character_,
+                       HUC12 = NA_character_,
+                       AU_ID = NA_character_,
+                       AU_Name = NA_character_,
+                       Snap.Lat = NA_real_,
+                       Snap.Long = NA_real_,
+                       stringsAsFactors = FALSE)
+
+  #- Checks --------------------------------------------------------------------
+
+  # check that all the col mappings are included
+  missing_required <- setdiff(c(col.req, col.opt), names(col_mapping))
+
+  if (length(missing_required) > 0) {
+    stop("There are missing column mappings in 'col_mapping'. Missing names: ",
+         paste0(missing_required, collapse = ", "))
+  }
 
   if (!is.numeric(px_ht)) {stop("px_ht is not a numeric value.")}
 
@@ -36,16 +254,45 @@ launch_map <- function(mloc, px_ht = 470,
 
   px_ht <- paste0(px_ht,"px")
 
-  # Column names for the Monitoring Locations worksheet in Oregon DEQ's
-  # continuous monitoring template
-  mloc_col_names <- odeqcdr::cols_mloc()
+  # Keep vector of original column names
+  col_orig <- names(mloc)
 
-  missing_cols <- df_mloc()[,!make.names(c(mloc_col_names, "HUC6_Name", "HUC8_Name", "HUC10_Name","HUC12_Name", "HUC6", "HUC8", "HUC10", "HUC12",
-                                           "AU_ID", "AU_Name", "Snap.Lat", "Snap.Long")) %in% names(mloc)]
+  # Reverse column mapping to return the col names to their originals
+  col_mapping_out <- setNames(names(col_mapping), col_mapping)
 
-  mloc <- cbind(mloc, missing_cols)
+  # Update df column names to tool col names
+  # update col names
+  mloc_names <- dplyr::rename(mloc, dplyr::any_of(col_mapping))
 
-  df.mloc <-  mloc %>%
+  # check that required columns are included
+  missing_required <- setdiff(col.req, names(mloc_names))
+
+  if (length(missing_required) > 0) {
+    stop("There required columns missing in 'mloc' or not named correctly in 'col_mapping'. Missing columns: ",
+         paste0(missing_required, collapse = ", "))
+  }
+
+  # check that all the optional columns are included
+  missing_optional <- setdiff(c(col.opt), names(mloc_names))
+
+
+  if (length(missing_optional) > 0) {
+    warning("There were missing optional columns in 'mloc'.
+            These columns were added with intial vaules set to NA: ",
+            paste0(missing_optional, collapse = ", "))
+  }
+
+  # Create a df of only required cols
+  mloc_tool <- dplyr::select(mloc_names, dplyr::any_of(c(col.req, col.opt)))
+  missing_cols <- col.df[,!names(col.df) %in% names(mloc_tool)]
+  mloc_tool <- cbind(mloc_tool, missing_cols)
+
+
+  # Make second df of extra cols not used by tool + plus "Monitoring.Location.ID" for join back.
+  mloc_extra <- dplyr::select(mloc_names, -dplyr::any_of(c("Monitoring.Location.Name",
+                                                           "Latitude",
+                                                           "Longitude", col.opt)))
+  df.mloc <- mloc_tool %>%
     dplyr::mutate(choices = paste(Monitoring.Location.ID, Monitoring.Location.Name, sep = " - "),
                   row = dplyr::row_number())
 
@@ -53,44 +300,52 @@ launch_map <- function(mloc, px_ht = 470,
 
   app <- shiny::shinyApp(
 
-    # Shiny UI -----
-    ui = shiny::shinyUI(shiny::fluidPage(shiny::tags$head(shiny::tags$style('.selectize-dropdown {z-index: 10000}')),
-                                         shiny::fluidRow(shiny::column(width = 4, shiny::selectInput(inputId = "selectStation",
-                                                                                                     label = "Zoom to Monitoring Location",
-                                                                                                     choices = unique(df.mloc$choices),
-                                                                                                     multiple = FALSE, width = "100%", selectize = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "NEXT", label = "Next MLoc", style = "margin-top: 25px;"), align = "left"),
-                                                         shiny::column(width = 2, shiny::selectizeInput(inputId = "mlocTypeSelect", label = "Monitoring Location Type",
-                                                                                                        choices = c("",odeqcdr::valid_values(col = "Monitoring Location Type")),
-                                                                                                        multiple = FALSE, width = '100%',
-                                                                                                        options = list(create = TRUE))),
-                                                         shiny::column(width = 2, shiny::verbatimTextOutput("STATUSprintout", placeholder = TRUE), style = "margin-top: 25px;"),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "STATUSsave", label = "Update Status", style = "margin-top: 25px;"), align = "left")),
+    # Shiny UI -----------------------------------------------------------------
+    ui = shiny::shinyUI(shiny::fluidPage(bslib::navset_tab(
+      bslib::nav_panel("Map", shiny::fluidPage(shiny::tags$head(shiny::tags$style('.selectize-dropdown {z-index: 10000}')),
+                                               shiny::fluidRow(shiny::column(width = 4, shiny::selectInput(inputId = "selectStation",
+                                                                                                           label = "Zoom to Monitoring Location",
+                                                                                                           choices = unique(df.mloc$choices),
+                                                                                                           multiple = FALSE, width = "100%", selectize = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "NEXT", label = "Next MLoc", style = "margin-top: 25px;"), align = "left"),
+                                                               shiny::column(width = 2, shiny::selectizeInput(inputId = "mlocTypeSelect", label = "Monitoring Location Type",
+                                                                                                              choices = c("",
+                                                                                                                          "River/Stream", "Lake", "Reservoir", "Canal Transport",
+                                                                                                                          "Estuary", "Facility Industrial",
+                                                                                                                          "Facility Municipal Sewage (POTW)", "Facility Other", "Ocean",
+                                                                                                                          "Other-Surface Water", "Pipe, Unspecified Source",
+                                                                                                                          "Seep", "Spring", "Storm Sewer"),
+                                                                                                              multiple = FALSE, width = '100%',
+                                                                                                              options = list(create = TRUE))),
+                                                               shiny::column(width = 2, shiny::verbatimTextOutput("STATUSprintout", placeholder = TRUE), style = "margin-top: 25px;"),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "STATUSsave", label = "Update Status", style = "margin-top: 25px;"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("NHD Info"), align = "right"),
-                                                         shiny::column(width = 4, shiny::verbatimTextOutput("NHDprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "NHDsave", label = "Save NHD Info", style = "margin-top: 0px;"), align = "left"),
-                                                         shiny::column(width = 1, shiny::h6("Click Lat/Long"), align = "right"),
-                                                         shiny::column(width = 3, shiny::verbatimTextOutput("XYprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "XYsave", label = "Save Lat/Long", style = "margin-top: 0px;"), align = "left")),
+                                               shiny::fluidRow(shiny::column(width = 1, shiny::h6("NHD Info"), align = "right"),
+                                                               shiny::column(width = 4, shiny::verbatimTextOutput("NHDprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "NHDsave", label = "Save NHD Info", style = "margin-top: 0px;"), align = "left"),
+                                                               shiny::column(width = 1, shiny::h6("Click Lat/Long"), align = "right"),
+                                                               shiny::column(width = 3, shiny::verbatimTextOutput("XYprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "XYsave", label = "Save Lat/Long", style = "margin-top: 0px;"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("LLID Info"), align = "right"),
-                                                         shiny::column(width = 4, shiny::verbatimTextOutput("LLIDprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "LLIDsave", label = "Save LLID Info", style = "margin-top: 0px;"), align = "left"),
-                                                         shiny::column(width = 1, shiny::h6("AWQMS Alt ID"), align = "right"),
-                                                         shiny::column(width = 3, shiny::verbatimTextOutput("AWQMSprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "AWQMSsave", label = "Save Alt ID"), align = "left")),
+                                               shiny::fluidRow(shiny::column(width = 1, shiny::h6("LLID Info"), align = "right"),
+                                                               shiny::column(width = 4, shiny::verbatimTextOutput("LLIDprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "LLIDsave", label = "Save LLID Info", style = "margin-top: 0px;"), align = "left"),
+                                                               shiny::column(width = 1, shiny::h6("AWQMS Alt ID"), align = "right"),
+                                                               shiny::column(width = 3, shiny::verbatimTextOutput("AWQMSprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "AWQMSsave", label = "Save Alt ID"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width = 1, shiny::h6("HUC Info"), align = "right"),
-                                                         shiny::column(width = 4, shiny::verbatimTextOutput("HUCprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "HUCsave", label = "Save HUC Info", style = "margin-top: 0px;"), align = "left"),
-                                                         shiny::column(width = 1, shiny::h6("AU ID"), align = "right"),
-                                                         shiny::column(width = 3, shiny::verbatimTextOutput("AUprintout", placeholder = TRUE)),
-                                                         shiny::column(width = 1, shiny::actionButton(inputId = "AUsave", label = "Save AU info"), align = "left")),
+                                               shiny::fluidRow(shiny::column(width = 1, shiny::h6("HUC Info"), align = "right"),
+                                                               shiny::column(width = 4, shiny::verbatimTextOutput("HUCprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "HUCsave", label = "Save HUC Info", style = "margin-top: 0px;"), align = "left"),
+                                                               shiny::column(width = 1, shiny::h6("AU ID"), align = "right"),
+                                                               shiny::column(width = 3, shiny::verbatimTextOutput("AUprintout", placeholder = TRUE)),
+                                                               shiny::column(width = 1, shiny::actionButton(inputId = "AUsave", label = "Save AU info"), align = "left")),
 
-                                         shiny::fluidRow(shiny::column(width = 12, leaflet::leafletOutput(outputId = "map", width = "100%", height = px_ht))),
-                                         shiny::fluidRow(shiny::column(width = 1, shiny::actionButton(inputId = "return_df", label = "Close App, Return Changes", style = "margin-top: 5px;"))))
-    ),
+                                               shiny::fluidRow(shiny::column(width = 12, leaflet::leafletOutput(outputId = "map", width = "100%", height = px_ht))),
+                                               shiny::fluidRow(shiny::column(width = 1, shiny::actionButton(inputId = "return_df", label = "Close App, Return Changes", style = "margin-top: 5px;"))))
+      ),
+      bslib::nav_panel("Table",shiny::fluidPage(DT::DTOutput("mloc_data"))),
+    ))),
     # Shiny server -----
     server = shiny::shinyServer(function(input, output, session) {
 
@@ -101,6 +356,7 @@ launch_map <- function(mloc, px_ht = 470,
                                   Reachcode = NULL,
                                   Measure = NULL,
                                   LLID = NULL,
+                                  GNIS_Name = NULL,
                                   River.Mile = NULL,
                                   Latitude = NULL,
                                   Longitude = NULL,
@@ -128,6 +384,26 @@ launch_map <- function(mloc, px_ht = 470,
       df_reactive <- shiny::reactive({
         df.selectStation <- cr$df %>%
           dplyr::filter(choices == input$selectStation)
+      })
+
+      # Table -----
+      output$mloc_data <- DT::renderDT({
+        DT::datatable(cr$df, class = 'cell-border stripe',
+                      rownames = TRUE,
+                      editable = list(target = "cell",
+                                      disable = list(columns = c(0:4,26:29))))})
+
+      # when there is any edit to a cell, write that edit back to cr$df
+      # check to make sure it's positive, if not convert
+      shiny::observeEvent(input$mloc_data_cell_edit, {
+        #get values
+        edit = input$mloc_data_cell_edit
+        r = as.numeric(edit$row)
+        c = as.numeric(edit$col)
+        v = edit$value
+
+        # write value back cr
+        cr$df[r,c] <- v
       })
 
       # Render the map
@@ -373,6 +649,7 @@ launch_map <- function(mloc, px_ht = 470,
 
               cr$Permanent.Identifier <- click$properties$Permanent_Identifier
               cr$Reachcode <- click$properties$ReachCode
+              cr$GNIS_Name <- click$properties$GNIS_Name
               cr$Measure <- NHDpoint$Measure
               cr$Snap.Lat <- NHDpoint$Snap.Lat
               cr$Snap.Long <- NHDpoint$Snap.Long
@@ -544,7 +821,7 @@ launch_map <- function(mloc, px_ht = 470,
         # NHD printout ----
         output$NHDprintout <- shiny::renderPrint({
           df.selectStation %>%
-            dplyr::select(Permanent.Identifier, Reachcode, Measure)
+            dplyr::select(GNIS_Name, Permanent.Identifier, Reachcode, Measure)
         })
 
         # LLID printout ----
@@ -654,6 +931,9 @@ launch_map <- function(mloc, px_ht = 470,
                         Permanent.Identifier = dplyr::if_else(choices == input$selectStation,
                                                               cr$Permanent.Identifier,
                                                               Permanent.Identifier),
+                        GNIS_Name  = dplyr::if_else(choices == input$selectStation,
+                                                    cr$GNIS_Name,
+                                                    GNIS_Name),
                         Snap.Lat = dplyr::if_else(choices == input$selectStation,
                                                   cr$Snap.Lat,
                                                   Snap.Lat),
@@ -734,11 +1014,11 @@ launch_map <- function(mloc, px_ht = 470,
 
         cr$df <- cr$df %>%
           dplyr::mutate(AU_ID = ifelse(choices == input$selectStation,
-                                                cr$AU_ID,
-                                                AU_ID),
+                                       cr$AU_ID,
+                                       AU_ID),
                         AU_Name = ifelse(choices == input$selectStation,
-                                       cr$AU_Name,
-                                       AU_Name))
+                                         cr$AU_Name,
+                                         AU_Name))
 
         output$AUprintout <- shiny::renderText({"Success! AU ID saved."})
       }, priority = 1)
@@ -783,6 +1063,7 @@ launch_map <- function(mloc, px_ht = 470,
                                                        "<b>Reachcode:</b> ", Reachcode, "<br>",
                                                        "<b>Measure:</b> ", Measure, "<br>",
                                                        "<b>LLID:</b> ", LLID, "<br>",
+                                                       "<b>GNIS_Name:</b> ", GNIS_Name, "<br>",
                                                        "<b>River.Mile:</b> ", River.Mile, "<br>",
                                                        "<b>HUC8:</b> ", HUC8_Name, "<br>",
                                                        "<b>HUC8_Name:</b> ", HUC8_Name, "<br>",
@@ -792,7 +1073,7 @@ launch_map <- function(mloc, px_ht = 470,
                                                        "<b>HUC12_Name:</b> ", HUC12_Name, "<br>",
                                                        "<b>AU_ID:</b> ", AU_ID, "<br>",
                                                        "<b>AU_Name:</b> ", AU_Name, "<br>"
-                                                       ),
+                                       ),
                                        label = ~paste0(Monitoring.Location.ID, ": ", Monitoring.Location.Name),
                                        lat = ~Latitude,
                                        lng = ~Longitude,
@@ -812,10 +1093,16 @@ launch_map <- function(mloc, px_ht = 470,
 
       # Return button ----
       # When close app button is pushed, return df
+      # join back cols not used by tool
+      # rename the cols to the original name
       shiny::observeEvent(input$return_df, {
-        return_df <- cr$df
-        return_df$choices <- NULL
-        return_df$row <- NULL
+
+        return_df <- cr$df %>%
+          dplyr::left_join(mloc_extra,
+                           by = dplyr::join_by(Monitoring.Location.ID)) %>%
+          dplyr::rename(dplyr::any_of(col_mapping_out)) %>%
+          dplyr::select(dplyr::any_of(unique(c(col_orig, names(col_mapping)))))
+
         shiny::stopApp(returnValue = return_df)
       }, priority = 0)
 

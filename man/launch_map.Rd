@@ -4,17 +4,67 @@
 \alias{launch_map}
 \title{Launch a web map in a browser to review and edit monitoring location information}
 \usage{
-launch_map(mloc, px_ht = 470, hide_layers = c("LLID Streams", "Hydrography"))
+launch_map(
+  mloc,
+  px_ht = 470,
+  hide_layers = c("LLID Streams", "Hydrography"),
+  col_mapping = c(Monitoring.Location.ID = "Monitoring.Location.ID",
+    Monitoring.Location.Name = "Monitoring.Location.Name", Latitude = "Latitude",
+    Longitude = "Longitude", Monitoring.Location.Status.ID =
+    "Monitoring.Location.Status.ID", Monitoring.Location.Type =
+    "Monitoring.Location.Type", Permanent.Identifier = "Permanent.Identifier", Reachcode
+    = "Reachcode", Measure = "Measure", GNIS_Name = "GNIS_Name", River.Mile =
+    "River.Mile", LLID = "LLID", Alternate.ID.1 = "Alternate.ID.1", Alternate.Context.1 =
+    "Alternate.Context.1", 
+     HUC6_Name = "HUC6_Name", HUC8_Name = "HUC8_Name",
+    HUC10_Name = "HUC10_Name", HUC12_Name = "HUC12_Name", HUC6 = "HUC6", HUC8 = "HUC8",
+    HUC10 = "HUC10", HUC12 = "HUC12", AU_ID = "AU_ID", AU_Name = "AU_Name", Snap.Lat =
+    "Snap.Lat", Snap.Long = "Snap.Long")
+)
 }
 \arguments{
 \item{mloc}{Data frame of the monitoring location information.
-Required columns are 'Monitoring.Location.ID', 'Monitoring.Location.Name',
-'Latitude', and 'Longitude'. Other columns are optional but will be added
-if not present and the values set to NA. The full set of mloc column names
-can be generated using \code{\link[odeqcdr:cols_mloc]{odeqcdr::cols_mloc}}
-or as a data frame using \code{\link{df_mloc}}. "Snap.Lat" and "Snap.Long"
-"HUC6", "HUC6_Name","HUC8", "HUC8_Name", "HUC10", "HUC10_Name", "HUC12", "HUC12_Name",
-"AU_ID", "AU_Name" are added.}
+   Required data frame columns include:
+   \itemize{
+     \item{'Monitoring.Location.ID'}
+     \item{'Monitoring.Location.Name'}
+     \item{'Latitude'}
+     \item{'Longitude'}
+     }
+
+   The columns listed below are optional but will be added by the tool.
+
+   \itemize{
+     \item{'Monitoring.Location.Type'}
+     \item{'Permanent.Identifier'}
+     \item{'Reachcode'}
+     \item{'Measure'}
+     \item{'GNIS_Name'}
+     \item{'LLID'}
+     \item{'River.Mile'}
+     \item{'Alternate.ID.1'}
+     \item{'Alternate.Context.1'}
+     \item{'HUC6'}
+     \item{'HUC6_Name'}
+     \item{'HUC8'}
+     \item{'HUC8_Name'}
+     \item{'HUC10'}
+     \item{'HUC10_Name'}
+     \item{'HUC12'}
+     \item{'HUC12_Name'}
+     \item{'AU_ID'}
+     \item{'AU_Name'}
+     \item{'Snap.Lat'}
+     \item{'Snap.Long'}
+     }
+
+   If the column names in 'mloc' differ from those listed above the existing
+   column names can be mapped to the names used in the function using 'col_mapping'.
+
+   If optional columns are not present they will be added with initial values set to NA.
+   Any other columns can be included in 'mloc'. They will not be modified by the function.
+
+   The full set of mloc columns can be retrieved using \code{\link{df_mloc}}.}
 
 \item{px_ht}{Height of the map in pixels. Default is 470 which fits on most
 standard laptop screens. The minimum height is 300 pixels.}
@@ -25,10 +75,82 @@ The default is set to c("LLID Streams", "Hydrography")). To show all
 layers use hide_layers = NULL.
 Options include any of the following: "Review Stations", "AWQMS Stations",
 "NHD Streams", "LLID Streams", "Hydrography", and "Oregon Imagery".}
+
+\item{col_mapping}{A named character vector that maps the column
+                   names used in 'mloc' to those used in the function.
+                   The default mapping is set to the required column names.
+                   This assumes the names in your 'mloc' input are exactly the same as
+                   what is needed by the function. If the names differ, copy the mapping
+                   below to edit as needed. E.g. Function.Column.Name = "My.Column.Name".
+                   All 26 column names must be include in the vector, even if
+                   if they are not in 'mloc'.
+
+                   col_mapping = c(Monitoring.Location.ID = "Monitoring.Location.ID",
+                                   Monitoring.Location.Name = "Monitoring.Location.Name",
+                                   Latitude = "Latitude",
+                                   Longitude = "Longitude",
+                                   Monitoring.Location.Status.ID = "Monitoring.Location.Status.ID",
+                                   Monitoring.Location.Type = "Monitoring.Location.Type",
+                                   Permanent.Identifier = "Permanent.Identifier",
+                                   Reachcode = "Reachcode",
+                                   Measure = "Measure",
+                                   GNIS_Name = "GNIS_Name",
+                                   River.Mile = "River.Mile",
+                                   LLID = "LLID",
+                                   Alternate.ID.1 = "Alternate.ID.1",
+                                   Alternate.Context.1 = "Alternate.Context.1",
+                                   HUC6_Name = "HUC6_Name",
+                                   HUC8_Name = "HUC8_Name",
+                                   HUC10_Name = "HUC10_Name",
+                                   HUC12_Name = "HUC12_Name",
+                                   HUC6 = "HUC6",
+                                   HUC8 = "HUC8",
+                                   HUC10 = "HUC10",
+                                   HUC12 = "HUC12",
+                                   AU_ID = "AU_ID",
+                                   AU_Name = "AU_Name",
+                                   Snap.Lat = "Snap.Lat",
+                                   Snap.Long = "Snap.Long")}
 }
 \value{
-Launches a leaflet map within a Shiny app. Returns mloc data frame with any saved changes on app close.
+Returns mloc data frame with any saved changes on app close.
 }
 \description{
-Launch a web map in a browser to review and edit monitoring location information
+This function allows the review and edit of monitoring location information
+in an interactive map and table view. The app launches a web browser window that
+contains two tabs: A map and a table. In the map, a user can click anywhere to
+populate the Latitude and Longitude text box. Clicking save will save the
+coordinates in the table and move the marker to the new location. Clicking on the
+NHD or LLID lines will populate the text boxes with relevant values at those
+locations. Clicking save will update the information in the table. Alternatively,
+values may be edited directly in the table Tab. Double click on a cell to edit
+the value. Certain cells used internally by the app are not editable in table
+including Monitoring.Location.ID, Monitoring.Location.Name, and Latitude/Longitude.
+}
+\details{
+Attributes that can be added or edited to each monitoring location include:
+
+\itemize{
+     \item{'Latitude'}
+     \item{'Longitude'}
+     \item{'Monitoring.Location.Type'}
+     \item{'Permanent.Identifier'}
+     \item{'Reachcode'}
+     \item{'Measure'}
+     \item{'GNIS_Name'}
+     \item{'LLID'}
+     \item{'River.Mile'}
+     \item{'Alternate.ID.1'}
+     \item{'Alternate.Context.1'}
+     \item{'HUC6'}
+     \item{'HUC6_Name'}
+     \item{'HUC8'}
+     \item{'HUC8_Name'}
+     \item{'HUC10'}
+     \item{'HUC10_Name'}
+     \item{'HUC12'}
+     \item{'HUC12_Name'}
+     \item{'AU_ID'}
+     \item{'AU_Name'}
+     }
 }
