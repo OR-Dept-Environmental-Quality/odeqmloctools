@@ -9,7 +9,8 @@
 #' locations. Clicking save will update the information in the table. Alternatively,
 #' values may be edited directly in the table Tab. Double click on a cell to edit
 #' the value. Certain cells used internally by the app are not editable in table
-#' including Monitoring.Location.ID, Monitoring.Location.Name, and Latitude/Longitude.
+#' including Monitoring.Location.ID, Monitoring.Location.Name, and the NHD snapped
+#' Latitude/Longitude.
 #'
 #' Attributes that can be added or edited to each monitoring location include:
 #'
@@ -301,8 +302,9 @@ launch_map <- function(mloc, px_ht = 470,
   app <- shiny::shinyApp(
 
     # Shiny UI -----------------------------------------------------------------
-    ui = shiny::shinyUI(shiny::fluidPage(bslib::navset_tab(
-      bslib::nav_panel("Map", shiny::fluidPage(shiny::tags$head(shiny::tags$style('.selectize-dropdown {z-index: 10000}')),
+    ui = shiny::shinyUI(shiny::fluidPage(bslib::navset_pill(id = "tab_switch", selected = "Map",
+      bslib::nav_panel("Map", shiny::br(),
+                       shiny::fluidPage(shiny::tags$head(shiny::tags$style('.selectize-dropdown {z-index: 10000}')),
                                                shiny::fluidRow(shiny::column(width = 4, shiny::selectInput(inputId = "selectStation",
                                                                                                            label = "Zoom to Monitoring Location",
                                                                                                            choices = unique(df.mloc$choices),
@@ -344,7 +346,8 @@ launch_map <- function(mloc, px_ht = 470,
                                                shiny::fluidRow(shiny::column(width = 12, leaflet::leafletOutput(outputId = "map", width = "100%", height = px_ht))),
                                                shiny::fluidRow(shiny::column(width = 1, shiny::actionButton(inputId = "return_df", label = "Close App, Return Changes", style = "margin-top: 5px;"))))
       ),
-      bslib::nav_panel("Table",shiny::fluidPage(DT::DTOutput("mloc_data"))),
+      bslib::nav_panel("Table", shiny::br(),
+                       shiny::fluidPage(DT::DTOutput("mloc_data"))),
     ))),
     # Shiny server -----
     server = shiny::shinyServer(function(input, output, session) {
@@ -391,7 +394,7 @@ launch_map <- function(mloc, px_ht = 470,
         DT::datatable(cr$df, class = 'cell-border stripe',
                       rownames = TRUE,
                       editable = list(target = "cell",
-                                      disable = list(columns = c(0:4,26:29))))})
+                                      disable = list(columns = c(0:2,26:29))))})
 
       # when there is any edit to a cell, write that edit back to cr$df
       # check to make sure it's positive, if not convert
@@ -550,13 +553,23 @@ launch_map <- function(mloc, px_ht = 470,
                                                    "<b>Monitoring.Location.Name:</b> ", Monitoring.Location.Name, "<br>",
                                                    "<b>Monitoring.Location.Type:</b> ", Monitoring.Location.Type, "<br>",
                                                    "<b>Latitude:</b> ", Latitude, "<br>",
+                                                   "<b>Longitude:</b> ", Longitude, "<br>",
                                                    "<b>Alternate.ID.1:</b> ", Alternate.ID.1, "<br>",
                                                    "<b>Alternate.Context.1:</b> ", Alternate.Context.1, "<br>",
+                                                   "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>",
                                                    "<b>Reachcode:</b> ", Reachcode, "<br>",
                                                    "<b>Measure:</b> ", Measure, "<br>",
                                                    "<b>LLID:</b> ", LLID, "<br>",
+                                                   "<b>GNIS_Name:</b> ", GNIS_Name, "<br>",
                                                    "<b>River.Mile:</b> ", River.Mile, "<br>",
-                                                   "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>"),
+                                                   "<b>HUC8:</b> ", HUC8_Name, "<br>",
+                                                   "<b>HUC8_Name:</b> ", HUC8_Name, "<br>",
+                                                   "<b>HUC10:</b> ", HUC10, "<br>",
+                                                   "<b>HUC10_Name:</b> ", HUC10_Name, "<br>",
+                                                   "<b>HUC12:</b> ", HUC12, "<br>",
+                                                   "<b>HUC12_Name:</b> ", HUC12_Name, "<br>",
+                                                   "<b>AU_ID:</b> ", AU_ID, "<br>",
+                                                   "<b>AU_Name:</b> ", AU_Name, "<br>"),
                                    label = ~paste0(Monitoring.Location.ID, ": ", Monitoring.Location.Name),
                                    lat = ~Latitude,
                                    lng = ~Longitude,
@@ -649,7 +662,9 @@ launch_map <- function(mloc, px_ht = 470,
 
               cr$Permanent.Identifier <- click$properties$Permanent_Identifier
               cr$Reachcode <- click$properties$ReachCode
-              cr$GNIS_Name <- click$properties$GNIS_Name
+              cr$GNIS_Name <- ifelse(is.null(click$properties$GNIS_Name),
+                                     NA_character_,
+                                     click$properties$GNIS_Name)
               cr$Measure <- NHDpoint$Measure
               cr$Snap.Lat <- NHDpoint$Snap.Lat
               cr$Snap.Long <- NHDpoint$Snap.Long
@@ -794,7 +809,7 @@ launch_map <- function(mloc, px_ht = 470,
 
       # -Printouts ----
       # Populate printouts with whatever is saved into cr$df
-      shiny::observeEvent(input$selectStation, {
+      shiny::observeEvent(c(input$selectStation, input$tab_switch), {
 
         df.selectStation <- df_reactive()
 
@@ -1048,18 +1063,9 @@ launch_map <- function(mloc, px_ht = 470,
                                                        "<b>Monitoring.Location.Type:</b> ", Monitoring.Location.Type, "<br>",
                                                        "<b>Latitude:</b> ", Latitude, "<br>",
                                                        "<b>Longitude:</b> ", Longitude, "<br>",
-                                                       "<b>Horizontal.Datum:</b> ", Horizontal.Datum, "<br>",
-                                                       "<b>Coordinate.Collection.Method:</b> ", Coordinate.Collection.Method, "<br>",
-                                                       "<b>Source.Map.Scale:</b> ", Source.Map.Scale, "<br>",
-                                                       "<b>Monitoring.Location.Description:</b> ", Monitoring.Location.Description, "<br>",
-                                                       "<b>Tribal.Land:</b> ", Tribal.Land, "<br>",
-                                                       "<b>Tribal.Land.Name:</b> ", Tribal.Land.Name, "<br>",
                                                        "<b>Alternate.ID.1:</b> ", Alternate.ID.1, "<br>",
                                                        "<b>Alternate.Context.1:</b> ", Alternate.Context.1, "<br>",
-                                                       "<b>Alternate.ID.2:</b> ", Alternate.ID.2, "<br>",
-                                                       "<b>Alternate.Context.2:</b> ", Alternate.Context.2, "<br>",
-                                                       "<b>Alternate.ID.3:</b> ", Alternate.ID.3, "<br>",
-                                                       "<b>Alternate.Context.3:</b> ", Alternate.Context.3, "<br>",
+                                                       "<b>Permanent.Identifier:</b> ", Permanent.Identifier, "<br>",
                                                        "<b>Reachcode:</b> ", Reachcode, "<br>",
                                                        "<b>Measure:</b> ", Measure, "<br>",
                                                        "<b>LLID:</b> ", LLID, "<br>",

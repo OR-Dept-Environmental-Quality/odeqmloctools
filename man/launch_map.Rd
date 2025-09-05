@@ -125,7 +125,8 @@ NHD or LLID lines will populate the text boxes with relevant values at those
 locations. Clicking save will update the information in the table. Alternatively,
 values may be edited directly in the table Tab. Double click on a cell to edit
 the value. Certain cells used internally by the app are not editable in table
-including Monitoring.Location.ID, Monitoring.Location.Name, and Latitude/Longitude.
+including Monitoring.Location.ID, Monitoring.Location.Name, and the NHD snapped
+Latitude/Longitude.
 }
 \details{
 Attributes that can be added or edited to each monitoring location include:
