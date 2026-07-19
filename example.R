@@ -1,12 +1,10 @@
-library(dplyr)
-library(odeqmloctools)
 library(remotes)
 library(dplyr)
 
 remotes::install_github("OR-Dept-Environmental-Quality/odeqmloctools",
                          host = "https://api.github.com",
                          dependencies = TRUE, force = TRUE, upgrade = "never")
-
+library(odeqmloctools)
 
 # For this example pretend to only start with certain columns. Add CRS column.
 df.mloc <- odeqmloctools::mloc_example %>%
