@@ -430,26 +430,27 @@ launch_map <- function(mloc, px_ht = 470,
           leaflet::addMapPane("Lines", zIndex = 420) %>%
           leaflet::addMapPane("Points_Review", zIndex = 600) %>%
           # -Basemaps ----
-        leaflet.esri::addEsriTiledMapLayer(url = "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer",
-                                           options = leaflet::leafletOptions(pane = "Base")) %>%
+        leaflet::addTiles(urlTemplate = "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/{z}/{y}/{x}",
+                          options = leaflet::tileOptions(maxZoom = 22,
+                                                         maxNativeZoom = 16,
+                                                         pane = "Base"),
+                          attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer"> USGS The National Map: 3D Elevation Program. USGS Earth Resource Observation & Science (EROS) Center</a>') %>%
           leaflet::addTiles(urlTemplate = "//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                             options = leaflet::tileOptions(opacity = 0.7)) %>%
-          #leaflet::addProviderTiles(leaflet::providers$Esri.WorldImagery,
-          #                          group = "World Imagery",
-          #                          options = leaflet::leafletOptions(pane="Aerial1")) %>%
-          leaflet.esri::addEsriImageMapLayer(url = "https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2018/OSIP_2018_WM/ImageServer",
-                                             group = "Oregon Imagery",
-                                             options = leaflet::leafletOptions(pane = "Aerial2")) %>%
-          leaflet.esri::addEsriImageMapLayer(url = "https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2017/OSIP_2017_WM/ImageServer",
-                                             group = "Oregon Imagery",
-                                             options = leaflet::leafletOptions(pane = "Aerial2")) %>%
+          leaflet::addTiles(urlTemplate = "https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2022/OSIP_2022_WM/ImageServer/tile/{z}/{y}/{x}",
+                            group = "Oregon Imagery",
+                            options = leaflet::tileOptions(maxZoom = 22,
+                                                           maxNativeZoom = 19,
+                                                           pane = "Aerial2"),
+                            attribution = '<a href="https://imagery.oregonexplorer.info/arcgis/rest/services/OSIP_2022/OSIP_2022_WM/ImageServer"> Oregon Statewide Imagery Program (OSIP)</a>'
+          ) %>%
           leaflet::addWMSTiles(baseUrl = "https://basemap.nationalmap.gov/arcgis/services/USGSHydroCached/MapServer/WmsServer",
-                               group = "Hydrography",
-                               options = leaflet::WMSTileOptions(format = "image/png",
-                                                                 transparent = TRUE,
-                                                                 pane = "Hydro"),
-                               attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
-                               layers = "0") %>%
+                            group = "Hydrography",
+                            options = leaflet::WMSTileOptions(format = "image/png",
+                                                              transparent = TRUE,
+                                                              pane = "Hydro"),
+                            attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
+                            layers = "0") %>%
           # NHD ----
         leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1",
                                           group = "NHD Streams",
