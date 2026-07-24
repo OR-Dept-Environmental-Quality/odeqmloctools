@@ -24,7 +24,6 @@
     map.odeqmloctoolsEsriAttributionAdded = true;
   }
 
-  markerOptions = Object.assign({}, markerOptions);
   pathOptions = Object.assign({}, pathOptions, {
     stroke: stroke,
     color: color,
@@ -39,7 +38,6 @@
   });
 
   if (pane) {
-    markerOptions.pane = pane;
     pathOptions.pane = pane;
   }
 
@@ -48,10 +46,6 @@
 
     style: function() {
       return pathOptions;
-    },
-
-    pointToLayer: function(feature, latlng) {
-      return L.marker(latlng, markerOptions);
     },
 
     onEachFeature: function(feature, layer) {
@@ -118,6 +112,18 @@
       });
     }
   }, options);
+
+  if (markerOptions) {
+    markerOptions = Object.assign({}, markerOptions);
+
+    if (pane) {
+      markerOptions.pane = pane;
+    }
+
+    layerOptions.pointToLayer = function(feature, latlng) {
+      return L.marker(latlng, markerOptions);
+    };
+  }
 
   var featureLayer = L.esri.featureLayer(layerOptions);
   map.layerManager.addLayer(featureLayer, "geojson", layerId, group);

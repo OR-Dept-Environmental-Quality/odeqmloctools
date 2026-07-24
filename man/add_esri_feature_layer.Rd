@@ -10,7 +10,7 @@ add_esri_feature_layer(
   options = leaflet::leafletOptions(),
   layerId,
   group,
-  markerOptions = leaflet::markerOptions(),
+  markerOptions = NULL,
   labelProperty = NULL,
   labelOptions = leaflet::labelOptions(),
   popupProperty = NULL,
