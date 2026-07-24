@@ -452,10 +452,10 @@ launch_map <- function(mloc, px_ht = 470,
                             attribution = '<a href="https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer">USGS The National Map: National Hydrography Dataset.</a>',
                             layers = "0") %>%
           # NHD ----
-        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1",
+        add_esri_feature_layer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1",
                                           group = "NHD Streams",
                                           layerId = "NHD",
-                                          fitBounds = FALSE,
+                                          fields = c("OBJECTID", "Permanent_Identifier", "GNIS_Name", "ReachCode"),
                                           stroke = TRUE,
                                           weight = 2,
                                           fill = FALSE,
@@ -472,11 +472,10 @@ launch_map <- function(mloc, px_ht = 470,
                                           labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.GNIS_Name+\": \"+props.ReachCode+\" \"}")
         ) %>%
           # LLID ----
-        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0",
+        add_esri_feature_layer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/DEQ_Streams/MapServer/0",
                                           group = "LLID Streams",
                                           layerId = "LLID",
-                                          useServiceSymbology = FALSE,
-                                          fitBounds = FALSE,
+                                          fields = c("OBJECTID", "LLID", "NAME"),
                                           stroke = TRUE,
                                           weight = 2,
                                           fill = FALSE,
@@ -493,11 +492,12 @@ launch_map <- function(mloc, px_ht = 470,
                                           labelProperty = htmlwidgets::JS("function(feature){var props = feature.properties; return props.NAME+\": \"+props.LLID+\" \"}")
         ) %>%
           # 1 AWQMS Stations ----
-        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/1",
+        add_esri_feature_layer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/1",
                                           group = "AWQMS Stations",
                                           layerId = "AWQMS_Stations1",
+                                          fields = c("OBJECTID", "MLocID", "StationDes", "OrgID", "MonLocType",
+                                                     "GNIS_Name", "Reachcode", "Measure", "Permanent_Identifier"),
                                           fillOpacity = 0.5,
-                                          fitBounds = FALSE,
                                           options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
                                           markerOptions = leaflet::markerOptions(zIndexOffset = 0,
                                                                                  riseOnHover = TRUE),
@@ -519,11 +519,12 @@ launch_map <- function(mloc, px_ht = 470,
                                                                                  ' \"}'))
         ) %>%
           # 0 AWQMS Stations ----
-        leaflet.esri::addEsriFeatureLayer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/0",
+        add_esri_feature_layer(url = "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/AWQMS_Stations/MapServer/0",
                                           group = "AWQMS Stations",
                                           layerId = "AWQMS_Stations0",
+                                          fields = c("OBJECTID", "station_key", "StationDes", "OrgID", "MonLocType",
+                                                     "GNIS_Name", "Reachcode", "Measure", "Permanent_Identifier"),
                                           fillOpacity = 0.5,
-                                          fitBounds = FALSE,
                                           options = leaflet::leafletOptions(pane = "Points_AWQMS", minZoom = 13),
                                           markerOptions = leaflet::markerOptions(zIndexOffset = 0,
                                                                                  riseOnHover = TRUE),

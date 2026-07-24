@@ -1,0 +1,18 @@
+ESRI Leaflet 3.0.19
+
+Bundled file: esri-leaflet.js
+Project: https://github.com/Esri/esri-leaflet
+Release: https://github.com/Esri/esri-leaflet/releases/tag/v3.0.19
+Website: https://developers.arcgis.com/esri-leaflet/esri-leaflet-plugin/
+
+GitHub release sha256: 7b6995296467a6d7006eb18176ec43404d3da85752a960dac184de67ef2dcc39
+esri-leaflet.js sha512: JdyjAR4jSy+LX0adKTa3704QjvEn1pddGzia5Uh7XNI7vfUHpIIygQVHOGEw0NrrJMsFkeAekJtoU1+1jGk3ig==
+
+Copyright (c) 2025 Environmental System Research Institute, Inc
+Licensed under the Apache License, Version 2.0
+
+The complete upstream license, including the third party notices supplied 
+by the ESRI Leaflet project, is included in the adjacent LICENSE file.
+
+The odeqmloctools R wrapper and JavaScript binding are separate package code and remain
+under the odeqmloctools license.
