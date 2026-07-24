@@ -8,7 +8,7 @@
 An object of class \code{data.frame} with 15 rows and 3 columns.
 }
 \usage{
-data(orwhuc6)
+data(orhuc6)
 }
 \description{
 Table of Oregon six digit hydrological codes and names.

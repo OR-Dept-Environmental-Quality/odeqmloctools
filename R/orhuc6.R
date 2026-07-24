@@ -12,7 +12,7 @@
 #' }
 #'
 #' @docType data
-#' @usage data(orwhuc6)
+#' @usage data(orhuc6)
 #' @keywords datasets
 #' @md
 #' @examples
