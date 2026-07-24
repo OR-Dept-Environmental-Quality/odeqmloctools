@@ -84,7 +84,7 @@ get_nhd_ <- function(x, y, crs, search_dist = 100) {
   query_url  <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1/query?"
 
 
-  request <- httr::GET(url = URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
+  request <- httr::GET(url = utils::URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
                                               "&inSR=",crs,"&outFields=*&returnGeometry=true",
                                               "&distance=",search_dist,"&units=esriSRUnit_Meter&returnIdsOnly=false&f=GeoJSON"), reserved = FALSE))
 

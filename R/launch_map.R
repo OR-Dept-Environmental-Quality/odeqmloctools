@@ -259,7 +259,7 @@ launch_map <- function(mloc, px_ht = 470,
   col_orig <- names(mloc)
 
   # Reverse column mapping to return the col names to their originals
-  col_mapping_out <- setNames(names(col_mapping), col_mapping)
+  col_mapping_out <- stats::setNames(names(col_mapping), col_mapping)
 
   # Update df column names to tool col names
   # update col names

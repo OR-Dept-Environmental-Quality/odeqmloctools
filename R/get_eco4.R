@@ -87,7 +87,7 @@ get_eco4_ <- function(x, y, crs){
 
   query_url <- "https://geodata.epa.gov/arcgis/rest/services/ORD/USEPA_Ecoregions_Level_III_and_IV/MapServer/7/query?"
 
-  request <- httr::GET(url = URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
+  request <- httr::GET(url = utils::URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
                                               "&inSR=",crs,"&outFields=*&returnGeometry=false",
                                               "&returnIdsOnly=false&f=GeoJSON"), reserved = FALSE))
 

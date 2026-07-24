@@ -92,7 +92,7 @@ get_huc10_ <- function(x, y, crs){
 
   query_url <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/WBD/MapServer/2/query?"
 
-  request <- httr::GET(url = URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
+  request <- httr::GET(url = utils::URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
                                               "&inSR=",crs,"&outFields=*&returnGeometry=false",
                                               "&returnIdsOnly=false&f=GeoJSON"), reserved = FALSE))
 

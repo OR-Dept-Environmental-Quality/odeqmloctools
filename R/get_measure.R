@@ -58,7 +58,7 @@ get_measure_ <- function(pid, x, y, crs=4326, return_sf=FALSE){
 
   query_url  <- "https://arcgis.deq.state.or.us/arcgis/rest/services/WQ/NHDH_ORDEQ/MapServer/1/query?where="
 
-  request <- httr::GET(url = URLencode(paste0(query_url , "Permanent_Identifier='",pid,
+  request <- httr::GET(url = utils::URLencode(paste0(query_url , "Permanent_Identifier='",pid,
                                               "'&outFields=*&returnGeometry=true&returnIdsOnly=false&f=GeoJSON")))
 
   response <- httr::content(request, as = "text", encoding = "UTF-8")

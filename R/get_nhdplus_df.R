@@ -67,7 +67,7 @@ get_nhdplus_df_ <- function(x, y, crs, search_dist = 100) {
   query_url  <- "https://hydro.nationalmap.gov/arcgis/rest/services/NHDPlus_HR/MapServer/2/query?"
 
 
-  request <- httr::GET(url = URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
+  request <- httr::GET(url = utils::URLencode(paste0(query_url, "geometryType=esriGeometryPoint&geometry=",x,",",y,
                                               "&inSR=",crs,"&outFields=*&returnGeometry=true",
                                               "&distance=",search_dist,"&units=esriSRUnit_Meter&returnIdsOnly=false&f=GeoJSON"), reserved = FALSE))
 
