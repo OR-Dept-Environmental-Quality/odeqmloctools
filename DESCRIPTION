@@ -1,7 +1,7 @@
 Package: odeqmloctools
 Type: Package
 Title: ODEQ Monitoring Location Tools
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(person(given = "Ryan",
            family = "Michie",
            role = c("aut", "cre"),
@@ -13,7 +13,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 LazyDataCompression: gzip
-RoxygenNote: 7.3.2
 Imports: 
     bslib (>= 0.9.0),
     dplyr (>= 1.1.0),
@@ -25,6 +24,7 @@ Imports:
     leafem (>= 0.1.1),
     leaflet (>= 2.1.1),
     lubridate (>= 1.7.0),
+    lwgeom (>= 0.2-14),
     magrittr (>= 2.0.1),
     purrr (>= 0.3.4),
     sf (>= 1.0-17),
@@ -34,3 +34,4 @@ Imports:
     utils
 Depends:
     R (>= 3.5.0)
+Config/roxygen2/version: 8.0.0

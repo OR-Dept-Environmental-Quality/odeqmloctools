@@ -11,5 +11,10 @@ This package provides QA/QC support for review and editing of monitoring locatio
 \author{
 \strong{Maintainer}: Ryan Michie \email{Ryan.Michie@deq.oregon.gov}
 
+Authors:
+\itemize{
+  \item Ryan Michie \email{Ryan.Michie@deq.oregon.gov}
+}
+
 }
 \keyword{internal}
